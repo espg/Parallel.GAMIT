@@ -49,6 +49,12 @@ const Station = () => {
         }
     }, [locationState]);
 
+    const stationTitle = station
+        ? station.network_code.toUpperCase() +
+          "." +
+          station.station_code.toUpperCase()
+        : "Station not found";
+
     return (
         <div className="min-h-[92vh] min-w-[100vw] flex transition-all duration-200">
             {loading ? (
@@ -64,8 +70,7 @@ const Station = () => {
                         className={"self-center w-full flex flex-col flex-wrap"}
                     >
                         <h1 className="text-6xl font-bold text-center">
-                            {station?.network_code?.toUpperCase()}.
-                            {station?.station_code?.toUpperCase()}
+                            {stationTitle}
                         </h1>
                         <h1 className="text-2xl font-base text-center">
                             {station?.country_code?.toUpperCase()}

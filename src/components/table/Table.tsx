@@ -1,6 +1,8 @@
-import { formattedDates } from "@utils/index";
+import { Spinner } from "@componentsReact";
+
 import { useNavigate } from "react-router-dom";
-import { Spinner } from "..";
+
+import { formattedDates } from "@utils/index";
 
 interface TableProps {
     table: string;

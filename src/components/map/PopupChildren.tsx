@@ -106,8 +106,14 @@ const PopupChildren = ({ station, fromMain }: PopupChildrenProps) => {
                                 </h2>
                                 <div className="flex">
                                     <strong>Filename: </strong>
-                                    <span className="ml-1">
-                                        {firstRinex.filename}
+                                    <span
+                                        className="ml-1"
+                                        title={firstRinex.filename}
+                                    >
+                                        {firstRinex.filename.length > 15
+                                            ? firstRinex.filename.slice(0, 15) +
+                                              "..."
+                                            : firstRinex.filename}
                                     </span>
                                 </div>
                                 <div className="flex">
@@ -132,8 +138,14 @@ const PopupChildren = ({ station, fromMain }: PopupChildrenProps) => {
                                 <h2 className="menu-title">Last Rinex</h2>
                                 <div className="flex">
                                     <strong>Filename: </strong>
-                                    <span className="ml-1">
-                                        {lastRinex.filename}
+                                    <span
+                                        className="ml-1"
+                                        title={lastRinex.filename}
+                                    >
+                                        {lastRinex.filename.length > 15
+                                            ? lastRinex.filename.slice(0, 15) +
+                                              "..."
+                                            : lastRinex.filename}
                                     </span>
                                 </div>
                                 <div className="flex">

@@ -1,7 +1,7 @@
 import { AxiosInstance } from "axios";
 import { axiosInstanceUnauth } from "./axiosconfig";
 import { GetParams, StationData, User } from "@types";
-import { transformParams } from "@utils/index";
+import { transformParams } from "@utils";
 /* <----------------------- UN AUTH -----------------------------> */
 
 export async function loginService<T>(

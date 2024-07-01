@@ -27,6 +27,7 @@ const DateTimePicker = ({
                 <button
                     className="badge badge-ghost"
                     type="button"
+                    style={{ height: "fit-content" }}
                     onClick={onClick}
                     ref={ref}
                 >

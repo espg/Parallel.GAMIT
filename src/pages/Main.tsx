@@ -5,7 +5,6 @@ import {
     Sidebar,
     Skeleton,
     StationsModal,
-    // StationInfo,
 } from "@componentsReact";
 
 import useApi from "@hooks/useApi";
@@ -13,6 +12,7 @@ import { useAuth } from "@hooks/useAuth";
 
 import { getStationsService } from "@services";
 import { GetParams, StationData, StationServiceData } from "@types";
+import { LatLngExpression } from "leaflet";
 import { showModal } from "@utils/index";
 
 const MainPage = () => {
@@ -25,6 +25,9 @@ const MainPage = () => {
     );
     const [initialStations, setInitialStations] = useState<
         StationData[] | undefined
+    >(undefined);
+    const [initialCenter, setInitialCenter] = useState<
+        LatLngExpression | undefined
     >(undefined);
 
     const [loading, setLoading] = useState<boolean>(true);
@@ -60,11 +63,15 @@ const MainPage = () => {
             );
             if (result) {
                 setStations(result.data);
+                if (result.data?.length > 0) {
+                    setInitialCenter([result.data[0].lat, result.data[0].lon]);
+                }
             }
         } catch (err) {
             console.error(err);
         }
     };
+
     // const [showStations, setShowStations] = useState<boolean>(false);
     const [showSidebar, setShowSidebar] = useState<boolean>(false);
 
@@ -72,16 +79,25 @@ const MainPage = () => {
         country_code: "",
         network_code: "",
         station_code: "",
-        limit: 1000,
+        limit: 0,
         offset: 0,
     });
 
     useEffect(() => {
         if (
             initialStations &&
-            (params.country_code !== "" ||
-                params.network_code !== "" ||
-                params.station_code !== "")
+            params.station_code === " " && // PARAMS RESETEADOS
+            params.country_code === " " &&
+            params.network_code === " "
+        ) {
+            setStations(initialStations);
+        }
+
+        if (
+            initialStations &&
+            (params.country_code?.trim() !== "" ||
+                params.network_code?.trim() !== "" ||
+                params.station_code?.trim() !== "")
         ) {
             getStations();
         }
@@ -90,7 +106,7 @@ const MainPage = () => {
     useEffect(() => {
         if (!initialStations) {
             // FIXME: Corresponder las initialstations al rango de la vista
-            //que el usuario tenga determinada, seguro tenga que hacer un nuevo getStations
+            //que el usuario tenga determinada ??¿¿, seguro tenga que hacer un nuevo getStations
             getInitialStations();
         }
     }, []);
@@ -134,7 +150,10 @@ const MainPage = () => {
                                 Stations
                             </button>
                         </div>
-                        <Map stations={stations ? stations : initialStations} />
+                        <Map
+                            stations={stations ? stations : initialStations}
+                            initialCenter={initialCenter}
+                        />
                     </div>
 
                     {modals?.show && modals.title === "Stations" && (

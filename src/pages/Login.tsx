@@ -1,11 +1,14 @@
 import { FormEvent, useEffect, useState } from "react";
-import { useAuth } from "@hooks/useAuth";
 
 import { Toast, Modal } from "@componentsReact";
 
-import { LoginServiceData } from "@types";
-import { showModal } from "@utils/index";
+import { useAuth } from "@hooks/useAuth";
+
 import { loginService, refreshTokenService } from "@services";
+
+import { showModal } from "@utils";
+import { AxiosError } from "axios";
+import { Errors, LoginServiceData } from "@types";
 
 const Login = () => {
     const [username, setUsername] = useState("");
@@ -69,9 +72,16 @@ const Login = () => {
                 login(response.access, true);
             }
         } catch (error) {
-            if (error instanceof Error) {
+            if (error instanceof AxiosError) {
+                const apiErrorResponse = error.response?.data as Errors;
+
                 genToast();
-                setMessage({ error: true, msg: error.message });
+                setMessage({
+                    error: true,
+                    msg: apiErrorResponse
+                        ? apiErrorResponse?.errors?.[0]?.detail
+                        : error.message,
+                });
                 console.error(error);
             }
         } finally {

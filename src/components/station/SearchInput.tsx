@@ -135,7 +135,6 @@ const SearchInput = ({ stations, params, setParams }: SearchInputProps) => {
 
         if (searchInput.length === 0) {
             setDropdownClassnames("hidden");
-            return;
         }
 
         setParams({
@@ -146,7 +145,7 @@ const SearchInput = ({ stations, params, setParams }: SearchInputProps) => {
         const filteredStations = stations?.filter((station) =>
             station.station_code
                 .toLowerCase()
-                .includes(searchInput.toLowerCase()),
+                .includes(searchInput.toLowerCase().trim()),
         );
 
         const newClassnames =

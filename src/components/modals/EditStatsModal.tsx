@@ -36,7 +36,13 @@ import {
 
 import { useApi, useAuth, useFormReducer } from "@hooks/index";
 import { STATION_INFO_STATE } from "@utils/reducerFormStates";
-import { dateToUTC } from "@utils/index";
+import {
+    dateFromDay,
+    dateToUTC,
+    dayFromDate,
+    formattedDates,
+    isValidDate,
+} from "@utils/index";
 
 interface EditStatsModalProps {
     stationInfo: StationInfoData | undefined;
@@ -65,7 +71,8 @@ const EditStatsModal = ({
     const { token, logout } = useAuth();
     const api = useApi(token, logout);
 
-    const { formState, dispatch } = useFormReducer(STATION_INFO_STATE);
+    const { formState, dispatch } =
+        useFormReducer<Record<string, any>>(STATION_INFO_STATE);
 
     const [loading, setLoading] = useState<boolean>(false);
     const [msg, setMsg] = useState<
@@ -84,6 +91,16 @@ const EditStatsModal = ({
     const [matchingHeightcodes, setMatchingHeightcodes] = useState<
         GamitHTCData[]
     >([]);
+
+    const [doyCheck, setDoyCheck] = useState<
+        { [key: string]: { check: boolean; input: string } } | undefined
+    >({
+        date_start: {
+            check: true,
+            input: "",
+        },
+        date_end: { check: true, input: "" },
+    });
 
     const [startDate, setStartDate] = useState<Date | null>(new Date());
 
@@ -298,14 +315,64 @@ const EditStatsModal = ({
         }
     }, [formState.antenna_code]); // eslint-disable-line
 
+    const checkDoy = (doyKey: string, formStateKey: string) => {
+        if (
+            doyCheck?.[doyKey].check === true &&
+            formState[formStateKey] !== null &&
+            formState[formStateKey] !== "" &&
+            formState[formStateKey]
+        ) {
+            const doyArr = dayFromDate(formState?.[formStateKey]);
+
+            setDoyCheck({
+                ...doyCheck,
+                [doyKey]: {
+                    check: true,
+                    input: doyArr,
+                },
+            });
+
+            dispatch({
+                type: "change_value",
+                payload: {
+                    inputName: formStateKey,
+                    inputValue: dateFromDay(
+                        dayFromDate(formState?.[formStateKey]),
+                    )?.toISOString(),
+                },
+            });
+        }
+    };
+
     useEffect(() => {
-        if (formState.date_start) {
+        if (
+            doyCheck?.date_start.check &&
+            formState.date_start !== null &&
+            formState.date_start !== "" &&
+            formState.date_start
+        ) {
+            checkDoy("date_start", "date_start");
+        }
+
+        if (formState.date_start && isValidDate(formState.date_start)) {
             setStartDate(dateToUTC(formState.date_start));
         }
-        if (formState.date_end) {
+    }, [formState.date_start]);
+
+    useEffect(() => {
+        if (
+            doyCheck?.date_end.check &&
+            formState.date_end !== null &&
+            formState.date_end !== "" &&
+            formState.date_end
+        ) {
+            checkDoy("date_end", "date_end");
+        }
+
+        if (formState.date_end && isValidDate(formState.date_end)) {
             setEndDate(dateToUTC(formState.date_end));
         }
-    }, [formState.date_end, formState.date_start]);
+    }, [formState.date_end]);
 
     return (
         <Modal
@@ -341,72 +408,164 @@ const EditStatsModal = ({
                                         {errorBadge.code.toUpperCase()}
                                     </div>
                                 )}
-
-                                <label
-                                    key={index}
-                                    id={key}
-                                    className={`input input-bordered flex items-center gap-2 ${errorBadge ? "input-error" : ""}`}
-                                    title={errorBadge ? errorBadge.detail : ""}
-                                >
-                                    <div className="label">
-                                        <span className="font-bold">
-                                            {key
-                                                .toUpperCase()
-                                                .replace("_", " ")
-                                                .replace("_", " ")}
-                                        </span>
-                                    </div>
-                                    <input
-                                        type={
-                                            key in inputsToDatePicker
-                                                ? "datetime-local"
-                                                : "text"
+                                <div className="flex w-full">
+                                    <label
+                                        key={index}
+                                        id={key}
+                                        className={`w-full input input-bordered flex items-center 
+                                            gap-2 ${errorBadge ? "input-error" : ""} 
+                                            ${inputsToDatePicker.includes(key) ? "w-11/12" : ""}`}
+                                        title={
+                                            errorBadge ? errorBadge.detail : ""
                                         }
-                                        name={key}
-                                        value={
-                                            formState[
-                                                key as keyof typeof formState
-                                            ] ?? ""
-                                        }
-                                        onChange={(e) => {
-                                            key === "date_start" ||
-                                            key === "date_end"
-                                                ? ""
-                                                : handleChange(e);
-                                        }}
-                                        className="grow "
-                                        autoComplete="off"
-                                        disabled={inputsToDisable.includes(key)}
-                                    />
-
-                                    {inputsToDatePicker.includes(key) && (
-                                        <>
-                                            <DateTimePicker
-                                                typeKey={key}
-                                                startDate={startDate}
-                                                endDate={endDate}
-                                                setStartDate={setStartDate}
-                                                setEndDate={setEndDate}
-                                                dispatch={dispatch}
-                                            />
-                                        </>
-                                    )}
-
-                                    {key === "comments" && (
-                                        <span className="badge badge-secondary">
-                                            Optional
-                                        </span>
-                                    )}
-                                    {(key === "receiver_code" ||
-                                        key === "antenna_code" ||
-                                        key === "height_code") && (
-                                        <MenuButton
-                                            setShowMenu={setShowMenu}
-                                            showMenu={showMenu}
-                                            typeKey={key}
+                                    >
+                                        <div className="label">
+                                            <span className="font-bold">
+                                                {key
+                                                    .toUpperCase()
+                                                    .replace("_", " ")
+                                                    .replace("_", " ")}
+                                            </span>
+                                        </div>
+                                        <input
+                                            type={
+                                                key in inputsToDatePicker
+                                                    ? "datetime-local"
+                                                    : "text"
+                                            }
+                                            name={key}
+                                            value={
+                                                inputsToDatePicker.includes(key)
+                                                    ? doyCheck?.[key]?.check
+                                                        ? doyCheck[key].input
+                                                        : inputsToDatePicker.includes(
+                                                                key,
+                                                            ) &&
+                                                            formState[
+                                                                key as keyof typeof formState
+                                                            ] !== "" &&
+                                                            formState[
+                                                                key as keyof typeof formState
+                                                            ] !== null
+                                                          ? formattedDates(
+                                                                new Date(
+                                                                    formState[
+                                                                        key as keyof typeof formState
+                                                                    ],
+                                                                ),
+                                                            )
+                                                          : ""
+                                                    : formState[
+                                                          key as keyof typeof formState
+                                                      ] ?? ""
+                                            }
+                                            onChange={(e) => {
+                                                const hasDoy =
+                                                    (key === "date_start" ||
+                                                        key === "date_end") &&
+                                                    doyCheck?.[key].check;
+                                                hasDoy
+                                                    ? (setDoyCheck({
+                                                          ...doyCheck,
+                                                          [key]: {
+                                                              check: true,
+                                                              input:
+                                                                  e.target
+                                                                      .value ??
+                                                                  0,
+                                                          },
+                                                      }),
+                                                      dispatch({
+                                                          type: "change_value",
+                                                          payload: {
+                                                              inputName: key,
+                                                              inputValue:
+                                                                  dateFromDay(
+                                                                      e.target
+                                                                          .value,
+                                                                  )?.toISOString(),
+                                                          },
+                                                      }))
+                                                    : handleChange(e);
+                                            }}
+                                            className="grow "
+                                            autoComplete="off"
+                                            disabled={inputsToDisable.includes(
+                                                key,
+                                            )}
+                                            readOnly={
+                                                inputsToDatePicker.includes(
+                                                    key,
+                                                ) && !doyCheck?.[key].check
+                                            }
+                                            placeholder={
+                                                inputsToDatePicker.includes(key)
+                                                    ? "YYYY DOY"
+                                                    : ""
+                                            }
                                         />
+                                        {inputsToDatePicker.includes(key) &&
+                                            !doyCheck?.[key].check && (
+                                                <>
+                                                    <DateTimePicker
+                                                        typeKey={key}
+                                                        startDate={startDate}
+                                                        endDate={endDate}
+                                                        setStartDate={
+                                                            setStartDate
+                                                        }
+                                                        setEndDate={setEndDate}
+                                                        dispatch={dispatch}
+                                                    />
+                                                </>
+                                            )}
+                                        {key === "comments" && (
+                                            <span className="badge badge-secondary">
+                                                Optional
+                                            </span>
+                                        )}
+                                        {(key === "receiver_code" ||
+                                            key === "antenna_code" ||
+                                            key === "height_code") && (
+                                            <MenuButton
+                                                setShowMenu={setShowMenu}
+                                                showMenu={showMenu}
+                                                typeKey={key}
+                                            />
+                                        )}
+                                    </label>
+                                    {inputsToDatePicker.includes(key) && (
+                                        <div className="form-control justify-center w-1/12">
+                                            <label className="label cursor-pointer">
+                                                <span className="label-text ml-auto mr-2 text-center font-semibold">
+                                                    DOY
+                                                </span>
+                                                <input
+                                                    type="checkbox"
+                                                    checked={
+                                                        doyCheck?.[key].check
+                                                    }
+                                                    onChange={() => {
+                                                        setDoyCheck({
+                                                            ...doyCheck,
+                                                            [key]: {
+                                                                check: !doyCheck?.[
+                                                                    key
+                                                                ].check,
+                                                                input: dayFromDate(
+                                                                    formState?.[
+                                                                        key as keyof typeof formState
+                                                                    ] ?? "",
+                                                                ),
+                                                            },
+                                                        });
+                                                    }}
+                                                    className="checkbox"
+                                                />
+                                            </label>
+                                        </div>
                                     )}
-                                </label>
+                                </div>
                                 {showMenu?.show &&
                                 showMenu.type === key &&
                                 key === "receiver_code" ? (

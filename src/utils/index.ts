@@ -40,6 +40,11 @@ export const validateFields = (
     return true;
 };
 
+export const isValidDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return !isNaN(date.getTime());
+};
+
 export const dateToUTC = (date: Date | string) => {
     const now = new Date(date);
     const utc = new Date(now.getTime() + now.getTimezoneOffset() * 60000);
@@ -56,6 +61,41 @@ export const woTz = (d: Date | undefined) => {
     const dateWoTz = d && tz && new Date(d?.getTime() - tz);
 
     return dateWoTz;
+};
+
+export const dateFromDay = (day: string) => {
+    const [year, dayOfYear] = day.split(" ");
+    const date = new Date(`${year}-01-01`);
+    // Corrección: Sumar los días como milisegundos al 1 de enero del año dado
+    date.setTime(date.getTime() + (Number(dayOfYear) - 1) * 86400000);
+    return date;
+};
+
+export const dayFromDate = (date: Date | string) => {
+    // const now = new Date();
+    const dateObj = new Date(date);
+    const startOfYear = new Date(Date.UTC(dateObj.getUTCFullYear(), 0, 1));
+    const diff = dateObj.getTime() - startOfYear.getTime();
+    const oneDay = 86400000; // milisegundos en un día
+    // Calcular el día del año
+    const dayOfYear = Math.floor(diff / oneDay) + 1; // +1 porque el día 1 del año es 1, no 0
+    // Si no hay datos devuelve el año actual y el dia 1
+    return `${isNaN(dateObj.getUTCFullYear()) ? "" : dateObj.getUTCFullYear()} ${isNaN(dayOfYear) ? "" : dayOfYear}`;
+    // return `${
+    //     isNaN(dateObj.getUTCFullYear())
+    //         ? new Date().getUTCFullYear()
+    //         : dateObj.getUTCFullYear()
+    // } ${
+    //     isNaN(dayOfYear)
+    //         ? Math.floor(
+    //               (now.getTime() -
+    //                   new Date(
+    //                       Date.UTC(now.getUTCFullYear(), 0, 1),
+    //                   ).getTime()) /
+    //                   86400000,
+    //           ) + 1
+    //         : dayOfYear
+    // }`;
 };
 
 export const transformParams = (params: any) => {
