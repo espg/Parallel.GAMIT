@@ -1,14 +1,16 @@
 import { useEffect, useMemo, useState } from "react";
-import { UsersModal, Pagination, Table } from "@componentsReact";
+import { MonumentModal, Pagination, Table } from "@componentsReact";
 
-import { useAuth, useApi } from "@hooks";
-import { getUsersService } from "@services";
+import useApi from "@hooks/useApi";
+import { useAuth } from "@hooks/useAuth";
 
-import { GetParams, UsersData, UsersServiceData } from "@types";
-import { showModal } from "@utils";
+import { getMonumentsTypesService } from "@services";
+import { showModal } from "@utils/index";
+
+import { GetParams, MonumentTypes, MonumentTypesServiceData } from "@types";
 import TableCard from "@components/table/TableCard";
 
-const UsersTable = () => {
+const MonumentsTable = () => {
     const { token, logout } = useAuth();
     const api = useApi(token, logout);
 
@@ -27,19 +29,25 @@ const UsersTable = () => {
     const [loading, setLoading] = useState<boolean>(false);
     const [params, setParams] = useState<GetParams>(bParams);
 
-    const [users, setUsers] = useState<UsersData[]>([]);
-    const [user, setUser] = useState<UsersData | undefined>(undefined);
+    const [monuments, setMonuments] = useState<MonumentTypes[]>([]);
+    const [monument, setMonument] = useState<MonumentTypes | undefined>(
+        undefined,
+    );
 
     const [activePage, setActivePage] = useState<number>(1);
     const [pages, setPages] = useState<number>(0);
     const PAGES_TO_SHOW = 2;
     const REGISTERS_PER_PAGE = 5; // Es el mismo que params.limit
 
-    const getUsers = async () => {
+    const getMonuments = async () => {
         try {
             setLoading(true);
-            const res = await getUsersService<UsersServiceData>(api, params);
-            setUsers(res.data);
+            const res =
+                await getMonumentsTypesService<MonumentTypesServiceData>(
+                    api,
+                    params,
+                );
+            setMonuments(res.data);
             setPages(Math.ceil(res.total_count / bParams.limit));
         } catch (err) {
             console.error(err);
@@ -48,11 +56,15 @@ const UsersTable = () => {
         }
     };
 
-    const paginateUsers = async (newParams: GetParams) => {
+    const paginateMonuments = async (newParams: GetParams) => {
         try {
             setLoading(true);
-            const res = await getUsersService<UsersServiceData>(api, newParams);
-            setUsers(res.data);
+            const res =
+                await getMonumentsTypesService<MonumentTypesServiceData>(
+                    api,
+                    newParams,
+                );
+            setMonuments(res.data);
         } catch (err) {
             console.error(err);
         } finally {
@@ -79,38 +91,28 @@ const UsersTable = () => {
 
         setParams(newParams);
         setActivePage(page);
-        paginateUsers(newParams);
+        paginateMonuments(newParams);
+    };
+
+    const reFetch = () => {
+        getMonuments();
     };
 
     useEffect(() => {
-        getUsers();
+        getMonuments();
     }, []); // eslint-disable-line
 
-    const titles = [
-        "First Name",
-        "Last Name",
-        "Username",
-        "Role",
-        "Email",
-        "Phone",
-        "Address",
-        "Active",
-    ];
+    const titles = ["Name", "Photo"];
 
     const body = useMemo(() => {
-        return users?.map((user) =>
+        return monuments?.map((monument) =>
             Object.values({
-                first_name: user.first_name,
-                last_name: user.last_name,
-                username: user.username,
-                role: user.role.name,
-                email: user.email,
-                phone: user.phone,
-                address: user.address,
-                active: user.is_active,
+                // id: monument.id,
+                name: monument.name,
+                photo: monument.photo_file,
             }),
         );
-    }, [users]);
+    }, [monuments]);
 
     useEffect(() => {
         modals?.show && showModal(modals.title);
@@ -118,27 +120,28 @@ const UsersTable = () => {
 
     return (
         <TableCard
-            title={"Users"}
-            addButtonTitle="+ User"
-            modalTitle="EditUsers"
-            addButton={true}
+            title={"Monuments"}
+            size={"750px"}
+            addButtonTitle="+ Monument"
+            modalTitle="EditMonuments"
             setModals={setModals}
+            addButton={true}
         >
             <Table
                 titles={body && body.length > 0 ? titles : []}
                 body={body}
-                table={"Users"}
+                table={"Monuments"}
                 loading={loading}
                 dataOnly={false}
                 onClickFunction={() =>
                     setModals({
                         show: true,
-                        title: "EditUsers",
+                        title: "EditMonuments",
                         type: "edit",
                     })
                 }
-                setState={setUser}
-                state={users}
+                setState={setMonument}
+                state={monuments}
             />
             {body ? (
                 <Pagination
@@ -148,18 +151,17 @@ const UsersTable = () => {
                     handlePage={handlePage}
                 />
             ) : null}
-
-            {modals?.show && modals.title === "EditUsers" && (
-                <UsersModal
-                    User={user}
+            {modals?.show && modals.title === "EditMonuments" && (
+                <MonumentModal
+                    Monument={monument}
                     modalType={modals.type}
                     setStateModal={setModals}
-                    setUser={setUser}
-                    reFetch={getUsers}
+                    setMonument={setMonument}
+                    reFetch={reFetch}
                 />
             )}
         </TableCard>
     );
 };
 
-export default UsersTable;
+export default MonumentsTable;

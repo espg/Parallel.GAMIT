@@ -5,6 +5,7 @@ interface ModalProps {
     close: boolean;
     modalId: string;
     size?: "sm" | "smPlus" | "md" | "lg" | "xl" | "fit";
+    variant?: "danger" | "warning" | "success";
     handleCloseModal?: () => void;
     setModalState?: React.Dispatch<
         React.SetStateAction<
@@ -19,6 +20,7 @@ const Modal = ({
     close,
     modalId,
     size,
+    variant,
     handleCloseModal,
     setModalState,
     children,
@@ -26,7 +28,16 @@ const Modal = ({
     return (
         <dialog id={modalId + "-modal"} className="modal">
             <div
-                className="modal-box"
+                className={`modal-box 
+                    ${
+                        variant && variant === "danger"
+                            ? "border-t-4 border-t-red-500"
+                            : variant === "warning"
+                              ? "border-t-4 border-t-yellow-500"
+                              : variant === "success"
+                                ? "border-t-4 border-t-green-500"
+                                : ""
+                    }`}
                 style={{ maxWidth: "", minWidth: size ? modalSizes[size] : "" }}
             >
                 {close && (

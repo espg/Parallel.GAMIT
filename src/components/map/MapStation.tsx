@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { MapContainer, Marker, Popup, TileLayer, useMap } from "react-leaflet";
 import { LatLngExpression } from "leaflet";
+import L from "leaflet";
 
 import { PopupChildren } from "@componentsReact";
 
@@ -38,6 +39,18 @@ const MapStation = ({ station }: MapProps) => {
         scrollWheelZoom: true,
     });
 
+    const okIcon = new L.Icon({
+        iconUrl:
+            "https://maps.google.com/mapfiles/kml/shapes/placemark_square.png",
+        iconSize: [20, 20],
+        className: "bg-green-600 border border-black",
+    });
+
+    const alertIcon = new L.Icon({
+        iconUrl: "https://maps.google.com/mapfiles/kml/shapes/caution.png",
+        iconSize: [20, 20],
+    });
+
     useEffect(() => {
         const pos: LatLngExpression = station
             ? [station.lat, station.lon]
@@ -49,11 +62,13 @@ const MapStation = ({ station }: MapProps) => {
         }));
     }, [station]);
 
+    const iconGaps = station?.has_gaps ? alertIcon : okIcon;
+
     return (
-        <div className=" z-10 pt-6 w-full flex justify-center">
+        <div className=" z-10 pt-6 w-6/12 flex justify-center">
             <MapContainer
                 {...mapProps}
-                className="w-[85vw] h-[70vh] xl:w-[70vw] lg:w-[60vw] md:w-[60vw] sm:w-[50vw]"
+                className="w-[55vw] h-[55vh] xl:w-[40vw] lg:w-[30vw] md:w-[30vw] sm:w-[20vw]"
             >
                 <TileLayer
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -62,6 +77,7 @@ const MapStation = ({ station }: MapProps) => {
                 />
                 <ChangeView center={mapProps.center} zoom={mapProps.zoom} />
                 <Marker
+                    icon={iconGaps}
                     key={station ? station.lat + station.lon : "key"}
                     position={mapProps.center}
                 >

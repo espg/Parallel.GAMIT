@@ -2,6 +2,7 @@ import { FormReducerAction } from "@hooks/useFormReducer";
 
 interface MenuContentProps {
     value: string;
+    alterValue?: string;
     typeKey: string;
     dispatch: (value: FormReducerAction) => void;
     setShowMenu: React.Dispatch<
@@ -17,6 +18,7 @@ interface MenuContentProps {
 
 const MenuContent = ({
     value,
+    alterValue,
     typeKey,
     dispatch,
     setShowMenu,
@@ -30,7 +32,7 @@ const MenuContent = ({
                         type: "change_value",
                         payload: {
                             inputName: typeKey,
-                            inputValue: value,
+                            inputValue: alterValue ? alterValue : value,
                         },
                     });
                     setShowMenu(undefined);

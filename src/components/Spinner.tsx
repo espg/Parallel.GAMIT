@@ -1,9 +1,13 @@
 interface SpinnerProps {
-    size: string;
+    size: "xs" | "sm" | "md" | "lg";
 }
 
 const Spinner = ({ size }: SpinnerProps) => {
-    return <span className={`loading loading-spinner loading-${size} `}></span>;
+    return (
+        <span
+            className={`loading loading-spinner loading-${size} loading- `}
+        ></span>
+    );
 };
 
 export default Spinner;

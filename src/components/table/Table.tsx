@@ -3,6 +3,8 @@ import { Spinner } from "@componentsReact";
 import { useNavigate } from "react-router-dom";
 
 import { formattedDates } from "@utils/index";
+import { findFlagUrlByIso3Code } from "country-flags-svg-v2";
+import { TrashIcon } from "@heroicons/react/24/outline";
 
 interface TableProps {
     table: string;
@@ -10,6 +12,7 @@ interface TableProps {
     body: any[][] | undefined;
     loading?: boolean;
     dataOnly?: boolean;
+    deleteRegister?: boolean;
     label?: string;
     state?: any;
     setState?: any;
@@ -21,6 +24,7 @@ const Table = ({
     body,
     loading,
     dataOnly,
+    deleteRegister,
     table,
     state,
     onClickFunction,
@@ -29,15 +33,20 @@ const Table = ({
     const navigate = useNavigate();
 
     return (
-        <div className="overflow-x-auto">
+        <div className={`overflow-x-auto`}>
             <table className="table table-zebra bg-neutral-content">
                 <thead>
                     <tr>
                         {titles.length > 0 ? (
-                            !dataOnly && (
+                            !dataOnly && !deleteRegister ? (
                                 <th className="text-center text-neutral">
                                     Modify
                                 </th>
+                            ) : (
+                                dataOnly &&
+                                deleteRegister && (
+                                    <th className="text-center text-neutral"></th>
+                                )
                             )
                         ) : (
                             <th className="text-center text-neutral text-2xl">
@@ -51,9 +60,8 @@ const Table = ({
                                 key={index}
                             >
                                 {title
-                                    .toUpperCase()
-                                    .replace("_", " ")
-                                    .replace("_", " ")}
+                                    ? title?.toUpperCase().replace(/_/g, " ")
+                                    : ""}
                             </th>
                         ))}
                     </tr>
@@ -76,8 +84,8 @@ const Table = ({
                                 key={index + 1}
                                 className={`${dataOnly && "cursor-pointer hover"}`}
                             >
-                                {!dataOnly && (
-                                    <td key={index}>
+                                {!dataOnly && !deleteRegister ? (
+                                    <td key={index} className="text-center">
                                         <button
                                             className="btn btn-sm btn-circle btn-ghost"
                                             onClick={() => {
@@ -88,6 +96,21 @@ const Table = ({
                                             📝
                                         </button>
                                     </td>
+                                ) : (
+                                    dataOnly &&
+                                    deleteRegister && (
+                                        <td key={index} className="text-center">
+                                            <button
+                                                className="btn btn-sm btn-square btn-ghost"
+                                                onClick={() => {
+                                                    onClickFunction();
+                                                    setState(state?.[index]);
+                                                }}
+                                            >
+                                                <TrashIcon className="size-6 text-red-600" />
+                                            </button>
+                                        </td>
+                                    )
                                 )}
                                 {row.map(
                                     (
@@ -98,11 +121,35 @@ const Table = ({
                                             !isNaN(Date.parse(val as string)) &&
                                             typeof val === "string" &&
                                             val?.includes("T");
+
+                                        const flag =
+                                            titles[idx] === "country_code" &&
+                                            val &&
+                                            findFlagUrlByIso3Code(
+                                                val as string,
+                                            );
+
+                                        const base64Str =
+                                            "data:image/png;base64,";
+
                                         return (
                                             <td
                                                 key={idx}
                                                 title={String(val) ?? ""}
-                                                className={`text-center ${row?.[idx] === false ? "text-red-600" : row?.[idx] === true && "text-green-600"}`}
+                                                className={`text-center 
+                                                    ${
+                                                        titles[idx] ===
+                                                            "country_code" &&
+                                                        "flex justify-center"
+                                                    }
+                                                    ${
+                                                        row?.[idx] === false
+                                                            ? "text-red-600"
+                                                            : row?.[idx] ===
+                                                                  true &&
+                                                              "text-green-600"
+                                                    }
+                                                        `}
                                                 onClick={() => {
                                                     dataOnly &&
                                                         table === "Stations" &&
@@ -111,31 +158,62 @@ const Table = ({
                                                         );
                                                 }}
                                             >
-                                                {val !== ""
-                                                    ? typeof val === "string"
-                                                        ? val?.length > 15 &&
-                                                          !isDate
-                                                            ? val?.substring(
-                                                                  0,
-                                                                  15,
-                                                              ) + "..."
-                                                            : isDate
-                                                              ? formattedDates(
-                                                                    new Date(
-                                                                        val,
-                                                                    ),
-                                                                )
-                                                              : val
-                                                        : typeof val ===
-                                                            "boolean"
-                                                          ? val
-                                                              ? "✔"
-                                                              : "✘"
-                                                          : typeof val ===
-                                                              "number"
-                                                            ? val
-                                                            : "-"
-                                                    : "-"}
+                                                {titles[idx] ===
+                                                    "country_code" &&
+                                                    val && (
+                                                        <img
+                                                            width={30}
+                                                            height={30}
+                                                            className="mr-2"
+                                                            src={`${flag}`}
+                                                        />
+                                                    )}
+
+                                                {val !== "" &&
+                                                titles[idx] !== "Photo" ? (
+                                                    typeof val === "string" ? (
+                                                        val?.length > 15 &&
+                                                        !isDate ? (
+                                                            val?.substring(
+                                                                0,
+                                                                15,
+                                                            ) + "..."
+                                                        ) : isDate ? (
+                                                            formattedDates(
+                                                                new Date(val),
+                                                            )
+                                                        ) : (
+                                                            val
+                                                        )
+                                                    ) : typeof val ===
+                                                      "boolean" ? (
+                                                        val ? (
+                                                            "✔"
+                                                        ) : (
+                                                            "✘"
+                                                        )
+                                                    ) : typeof val ===
+                                                      "number" ? (
+                                                        val
+                                                    ) : (
+                                                        "-"
+                                                    )
+                                                ) : val !== "" &&
+                                                  val !== null &&
+                                                  titles[idx] === "Photo" ? (
+                                                    <div className="avatar">
+                                                        <div className="w-14 mask mask-squircle ">
+                                                            <img
+                                                                src={
+                                                                    base64Str +
+                                                                    val
+                                                                }
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                ) : (
+                                                    "-"
+                                                )}
                                             </td>
                                         );
                                     },

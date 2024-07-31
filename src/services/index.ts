@@ -395,13 +395,13 @@ export async function postStationService<T>(
     }
 }
 
-export async function putStationService<T>(
+export async function patchStationService<T>(
     api: AxiosInstance,
     id: number,
-    data: StationData,
+    data: any,
 ): Promise<T> {
     try {
-        const response = await api.put(`api/stations/${id}`, data);
+        const response = await api.patch(`api/stations/${id}`, data);
         return response.data as Promise<T>;
     } catch (error) {
         return Promise.reject(error);
@@ -414,6 +414,31 @@ export async function delStationService<T>(
 ): Promise<T> {
     try {
         const response = await api.delete(`api/stations/${id}`);
+        return response.data as Promise<T>;
+    } catch (error) {
+        return Promise.reject(error);
+    }
+}
+
+export async function getStationMetaService<T>(
+    api: AxiosInstance,
+    id: number,
+): Promise<T> {
+    try {
+        const response = await api.get(`api/station-meta/${id}`);
+        return response.data as Promise<T>;
+    } catch (error) {
+        return Promise.reject(error);
+    }
+}
+
+export async function patchStationMetaService<T>(
+    api: AxiosInstance,
+    id: number,
+    data: any,
+): Promise<T> {
+    try {
+        const response = await api.patch(`api/station-meta/${id}`, data);
         return response.data as Promise<T>;
     } catch (error) {
         return Promise.reject(error);
@@ -590,6 +615,372 @@ export async function getRinexService<T>(
         const response = await api.get(
             `api/rinex${paramsArr.length > 0 ? `?${paramsArr}` : ""}`,
         );
+        return response.data as Promise<T>;
+    } catch (error) {
+        return Promise.reject(error);
+    }
+}
+
+// Overview
+
+// Monuments CRUD
+export async function getMonumentsTypesService<T>(
+    api: AxiosInstance,
+    params?: GetParams,
+): Promise<T> {
+    try {
+        const paramsArr = params ? transformParams(params) : "";
+        const response = await api.get(
+            `api/monument-types${paramsArr.length > 0 ? `?${paramsArr}` : ""}`,
+        );
+        return response.data as Promise<T>;
+    } catch (error) {
+        return Promise.reject(error);
+    }
+}
+
+export async function getMonumentsTypesByIdService<T>(
+    api: AxiosInstance,
+    id: number,
+): Promise<T> {
+    try {
+        const response = await api.get(`api/monument-types/${id}`);
+        return response.data as Promise<T>;
+    } catch (error) {
+        return Promise.reject(error);
+    }
+}
+
+export async function postMonumentTypesService<T>(
+    api: AxiosInstance,
+    data: FormData,
+): Promise<T> {
+    try {
+        const response = await api.post(`api/monument-types`, data, {
+            headers: {
+                "Content-Type": "multipart/form-data",
+            },
+        });
+        return response.data as Promise<T>;
+    } catch (error) {
+        return Promise.reject(error);
+    }
+}
+
+export async function patchMonumentTypesService<T>(
+    api: AxiosInstance,
+    id: number,
+    data: FormData | any,
+): Promise<T> {
+    try {
+        const response = await api.patch(`api/monument-types/${id}`, data, {
+            headers: {
+                "Content-Type": "multipart/form-data",
+            },
+        });
+        return response.data as Promise<T>;
+    } catch (error) {
+        return Promise.reject(error);
+    }
+}
+
+export async function delMonumentTypesService<T>(
+    api: AxiosInstance,
+    id: number,
+): Promise<T> {
+    try {
+        const response = await api.delete(`api/monument-types/${id}`);
+        return response.data as Promise<T>;
+    } catch (error) {
+        return Promise.reject(error);
+    }
+}
+
+// Station Status CRUD
+
+export async function getStationStatusService<T>(
+    api: AxiosInstance,
+    params?: GetParams,
+): Promise<T> {
+    try {
+        const paramsArr = params ? transformParams(params) : "";
+        const response = await api.get(
+            `api/station-status${paramsArr.length > 0 ? `?${paramsArr}` : ""}`,
+        );
+        return response.data as Promise<T>;
+    } catch (error) {
+        return Promise.reject(error);
+    }
+}
+
+export async function getStationStatusByIdService<T>(
+    api: AxiosInstance,
+    id: number,
+): Promise<T> {
+    try {
+        const response = await api.get(`api/station-status/${id}`);
+        return response.data as Promise<T>;
+    } catch (error) {
+        return Promise.reject(error);
+    }
+}
+
+export async function postStationStatusService<T>(
+    api: AxiosInstance,
+    data: { name: string },
+): Promise<T> {
+    try {
+        const response = await api.post(`api/station-status`, data);
+        return response.data as Promise<T>;
+    } catch (error) {
+        return Promise.reject(error);
+    }
+}
+
+export async function patchStationStatusService<T>(
+    api: AxiosInstance,
+    id: number,
+    data: { name: string },
+): Promise<T> {
+    try {
+        const response = await api.patch(`api/monument-types/${id}`, data);
+        return response.data as Promise<T>;
+    } catch (error) {
+        return Promise.reject(error);
+    }
+}
+
+export async function delStationStatusService<T>(
+    api: AxiosInstance,
+    id: number,
+): Promise<T> {
+    try {
+        const response = await api.delete(`api/station-status/${id}`);
+        return response.data as Promise<T>;
+    } catch (error) {
+        return Promise.reject(error);
+    }
+}
+
+// Station Roles CRUD
+
+export async function getStationRolesService<T>(
+    api: AxiosInstance,
+    params?: GetParams,
+): Promise<T> {
+    try {
+        const paramsArr = params ? transformParams(params) : "";
+        const response = await api.get(
+            `api/station-roles${paramsArr.length > 0 ? `?${paramsArr}` : ""}`,
+        );
+        return response.data as Promise<T>;
+    } catch (error) {
+        return Promise.reject(error);
+    }
+}
+
+export async function postStationRolesService<T>(
+    api: AxiosInstance,
+    data: { name: string },
+): Promise<T> {
+    try {
+        const response = await api.post(`api/station-roles`, data);
+        return response.data as Promise<T>;
+    } catch (error) {
+        return Promise.reject(error);
+    }
+}
+
+export async function patchStationRolesService<T>(
+    api: AxiosInstance,
+    id: number,
+    data: { name: string },
+): Promise<T> {
+    try {
+        const response = await api.patch(`api/station-roles/${id}`, data);
+        return response.data as Promise<T>;
+    } catch (error) {
+        return Promise.reject(error);
+    }
+}
+
+export async function delStationRolesService<T>(
+    api: AxiosInstance,
+    id: number,
+): Promise<T> {
+    try {
+        const response = await api.delete(`api/station-roles/${id}`);
+        return response.data as Promise<T>;
+    } catch (error) {
+        return Promise.reject(error);
+    }
+}
+
+// Station Types CRUD
+
+export async function getStationTypesService<T>(
+    api: AxiosInstance,
+    params?: GetParams,
+): Promise<T> {
+    try {
+        const paramsArr = params ? transformParams(params) : "";
+        const response = await api.get(
+            `api/station-types${paramsArr.length > 0 ? `?${paramsArr}` : ""}`,
+        );
+        return response.data as Promise<T>;
+    } catch (error) {
+        return Promise.reject(error);
+    }
+}
+
+export async function getStationTypesByIdService<T>(
+    api: AxiosInstance,
+    id: number,
+): Promise<T> {
+    try {
+        const response = await api.get(`api/station-types/${id}`);
+        return response.data as Promise<T>;
+    } catch (error) {
+        return Promise.reject(error);
+    }
+}
+
+export async function postStationTypesService<T>(
+    api: AxiosInstance,
+    data: { name: string },
+): Promise<T> {
+    try {
+        const response = await api.post(`api/station-types`, data);
+        return response.data as Promise<T>;
+    } catch (error) {
+        return Promise.reject(error);
+    }
+}
+
+export async function patchStationTypesService<T>(
+    api: AxiosInstance,
+    id: number,
+    data: { name: string },
+): Promise<T> {
+    try {
+        const response = await api.patch(`api/station-types/${id}`, data);
+        return response.data as Promise<T>;
+    } catch (error) {
+        return Promise.reject(error);
+    }
+}
+
+export async function delStationTypesService<T>(
+    api: AxiosInstance,
+    id: number,
+): Promise<T> {
+    try {
+        const response = await api.delete(`api/station-types/${id}`);
+        return response.data as Promise<T>;
+    } catch (error) {
+        return Promise.reject(error);
+    }
+}
+
+// People CRUD
+
+export async function getPeopleService<T>(
+    api: AxiosInstance,
+    params?: GetParams,
+): Promise<T> {
+    try {
+        const paramsArr = params ? transformParams(params) : "";
+        const response = await api.get(
+            `api/people${paramsArr.length > 0 ? `?${paramsArr}` : ""}`,
+        );
+        return response.data as Promise<T>;
+    } catch (error) {
+        return Promise.reject(error);
+    }
+}
+
+export async function postPeopleService<T>(
+    api: AxiosInstance,
+    data: FormData,
+): Promise<T> {
+    try {
+        const response = await api.post(`api/people`, data, {
+            headers: {
+                "Content-Type": "multipart/form-data",
+            },
+        });
+        return response.data as Promise<T>;
+    } catch (error) {
+        return Promise.reject(error);
+    }
+}
+
+export async function patchPeopleService<T>(
+    api: AxiosInstance,
+    id: number,
+    data: FormData | any,
+): Promise<T> {
+    try {
+        const response = await api.patch(`api/people/${id}`, data, {
+            headers: {
+                "Content-Type": "multipart/form-data",
+            },
+        });
+        return response.data as Promise<T>;
+    } catch (error) {
+        return Promise.reject(error);
+    }
+}
+
+export async function delPeopleService<T>(
+    api: AxiosInstance,
+    id: number,
+): Promise<T> {
+    try {
+        const response = await api.delete(`api/people/${id}`);
+        return response.data as Promise<T>;
+    } catch (error) {
+        return Promise.reject(error);
+    }
+}
+
+// FIN Overview
+
+// CRD role-person-station
+
+export async function getRolePersonStationService<T>(
+    api: AxiosInstance,
+    params?: GetParams,
+): Promise<T> {
+    try {
+        const paramsArr = params ? transformParams(params) : "";
+        const response = await api.get(
+            `api/role-person-station${paramsArr.length > 0 ? `?${paramsArr}` : ""}`,
+        );
+        return response.data as Promise<T>;
+    } catch (error) {
+        return Promise.reject(error);
+    }
+}
+
+export async function postRolePersonStationService<T>(
+    api: AxiosInstance,
+    data: { role: string; person: string },
+): Promise<T> {
+    try {
+        const response = await api.post(`api/role-person-station`, data);
+        return response.data as Promise<T>;
+    } catch (error) {
+        return Promise.reject(error);
+    }
+}
+
+export async function delRolePersonStationService<T>(
+    api: AxiosInstance,
+    id: number,
+): Promise<T> {
+    try {
+        const response = await api.delete(`api/role-person-station/${id}`);
         return response.data as Promise<T>;
     } catch (error) {
         return Promise.reject(error);

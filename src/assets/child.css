@@ -1,0 +1,9 @@
+.custom-padding > :nth-child(3),
+.custom-padding > :nth-child(4) {
+    @apply py-4;
+}
+
+.margin-custom > :nth-child(1),
+.margin-custom > :nth-child(3) {
+    @apply mr-4;
+}

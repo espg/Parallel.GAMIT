@@ -130,7 +130,10 @@ const Dropdown = ({
                                   (code: CountriesData) => (
                                       <a
                                           key={code.id}
-                                          className="flex items-center justify-around py-2 text-gray-700 hover:bg-gray-100 hover:rounded-md hover:text-gray-900 dark:text-gray-100 dark:hover:text-white dark:hover:bg-gray-600"
+                                          className="flex items-center 
+                                          justify-around py-2 text-gray-700 hover:bg-gray-100 
+                                          hover:rounded-md hover:text-gray-900 dark:text-gray-100 
+                                          dark:hover:text-white dark:hover:bg-gray-600 cursor-pointer"
                                           role="menuitem"
                                           onClick={() => {
                                               setDataSelected(
@@ -160,7 +163,10 @@ const Dropdown = ({
                                   (code: CountriesData, index: number) => (
                                       <a
                                           key={code.id + "index" + index}
-                                          className="flex items-center justify-around py-2 text-gray-700 hover:bg-gray-100 hover:rounded-md hover:text-gray-900 dark:text-gray-100 dark:hover:text-white dark:hover:bg-gray-600"
+                                          className="flex items-center justify-around 
+                                          py-2 text-gray-700 hover:bg-gray-100 hover:rounded-md 
+                                          hover:text-gray-900 dark:text-gray-100 dark:hover:text-white
+                                           dark:hover:bg-gray-600 cursor-pointer"
                                           role="menuitem"
                                           onClick={() => {
                                               setDataSelected(

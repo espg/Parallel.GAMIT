@@ -5,6 +5,7 @@ export interface GetParams {
     country_code?: string;
     station_code?: string;
     antenna_code?: string;
+    station_api_id?: string;
     offset: number;
     limit: number;
 }
@@ -43,10 +44,45 @@ export interface ExtendedStationInfoData extends StationInfoData {
     statusCode: number;
 }
 
+export interface StationMetadataServiceData {
+    battery_description: string;
+    communications_description: string;
+    has_battery: boolean;
+    has_communications: boolean;
+    has_gaps: boolean;
+    has_gaps_last_update_datetime: string;
+    has_gaps_update_needed: boolean;
+    id: string;
+    monument_type: string;
+    navigation_actual_file: string | null;
+    navigation_filename: string;
+    observations_actual_file: string | null;
+    observations_filename: string;
+    remote_access_link: string;
+    station: string;
+    station_type: string | null;
+    status: string;
+    statusCode: string;
+}
+
 export interface StationInfoServiceData {
     count: number;
     data: StationInfoData[];
     total_count: number;
+    statusCode: number;
+}
+
+export interface MonumentTypesServiceData {
+    count: number;
+    total_count: number;
+    data: MonumentTypes[];
+    statusCode: number;
+}
+
+export interface StationStatusServiceData {
+    count: number;
+    total_count: number;
+    data: StationStatus[];
     statusCode: number;
 }
 
@@ -120,7 +156,12 @@ export interface FrontPagesServiceData {
     data: FrontPagesData[];
 }
 
-export interface RolesServiceData {}
+export interface RolePersonStationServiceData {
+    count: number;
+    total_count: number;
+    data: RolePersonStationData[];
+    statusCode: number;
+}
 
 export interface UsersData {
     address: string;
@@ -167,6 +208,46 @@ export interface Role {
 export interface Cluster {
     id: number;
     name: string;
+}
+
+export interface ExtendedMonumentTypes extends MonumentTypes {
+    statusCode: number;
+}
+
+export interface MonumentTypes {
+    id: number;
+    name: string;
+    photo_file: string | null;
+}
+
+export interface ExtendedStationStatus extends StationStatus {
+    statusCode: number;
+}
+
+export interface StationStatus {
+    id: number;
+    name: string;
+}
+
+export interface PeopleServiceData {
+    count: number;
+    total_count: number;
+    data: People[];
+}
+
+export interface ExtendedPeople extends People {
+    statusCode: number;
+}
+
+export interface People {
+    id: number;
+    first_name: string;
+    last_name: string;
+    email: string;
+    phone: string;
+    address: string;
+    photo_actual_file: string;
+    user: number;
 }
 
 export interface EndpointCluster {
@@ -227,6 +308,10 @@ export interface RinexData {
     completion: number;
 }
 
+export interface ExtendedStationData extends StationData {
+    statusCode: number;
+}
+
 export interface StationData {
     api_id?: number;
     network_code: string;
@@ -238,6 +323,7 @@ export interface StationData {
     auto_y: number;
     auto_z: number;
     harpos_coeff_otl: string;
+    has_gaps: boolean;
     lat: number;
     lon: number;
     height: number;
@@ -285,4 +371,15 @@ export interface GamitHTCData {
     h_offset: number;
     height_code: string;
     v_offset: number;
+}
+
+export interface RolePersonStationData {
+    id: number;
+    role: number;
+    person: number;
+    station: number;
+}
+
+export interface ExtendedRolePersonStationData extends RolePersonStationData {
+    statusCode: number;
 }

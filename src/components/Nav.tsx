@@ -1,6 +1,7 @@
 import {
     ArrowRightEndOnRectangleIcon,
-    BellIcon,
+    MegaphoneIcon,
+    Squares2X2Icon,
     UserCircleIcon,
     UserGroupIcon,
     UserIcon,
@@ -30,7 +31,21 @@ const Nav = () => {
                 </Link>
             </div>
             <div className="navbar-end">
-                <button className="btn btn-ghost btn-circle">
+                <Link
+                    className="btn btn-ghost btn-circle"
+                    to={"/campaigns"}
+                    title="Campaigns"
+                >
+                    <MegaphoneIcon className="size-8" />
+                </Link>
+                <Link
+                    className="btn btn-ghost btn-circle"
+                    to={"/overview"}
+                    title="Overview"
+                >
+                    <Squares2X2Icon className="size-8" />
+                </Link>
+                {/* <button className="btn btn-ghost btn-circle">
                     <div className="indicator">
                         <BellIcon
                             fill="none"
@@ -39,12 +54,13 @@ const Nav = () => {
                         />
                         <span className="badge badge-xs badge-primary indicator-item"></span>
                     </div>
-                </button>
+                </button> */}
                 <div className="dropdown dropdown-end">
                     <div
                         tabIndex={0}
                         role="button"
                         className="btn btn-ghost btn-circle avatar"
+                        title="User"
                     >
                         {!userPhoto ? (
                             <UserCircleIcon className="size-8" />

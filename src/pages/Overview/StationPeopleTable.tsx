@@ -1,14 +1,27 @@
 import { useEffect, useMemo, useState } from "react";
-import { UsersModal, Pagination, Table } from "@componentsReact";
 
-import { useAuth, useApi } from "@hooks";
-import { getUsersService } from "@services";
+import {
+    StationPeopleModal,
+    Pagination,
+    Table,
+    TableCard,
+} from "@componentsReact";
 
-import { GetParams, UsersData, UsersServiceData } from "@types";
+import useApi from "@hooks/useApi";
+import { useAuth } from "@hooks/useAuth";
 import { showModal } from "@utils";
-import TableCard from "@components/table/TableCard";
 
-const UsersTable = () => {
+import { getPeopleService, getUsersService } from "@services";
+
+import {
+    GetParams,
+    People,
+    PeopleServiceData,
+    UsersData,
+    UsersServiceData,
+} from "@types";
+
+const PeopleTable = () => {
     const { token, logout } = useAuth();
     const api = useApi(token, logout);
 
@@ -27,19 +40,21 @@ const UsersTable = () => {
     const [loading, setLoading] = useState<boolean>(false);
     const [params, setParams] = useState<GetParams>(bParams);
 
+    const [peoples, setPeoples] = useState<People[]>([]);
+    const [people, setPeople] = useState<People | undefined>(undefined);
+
     const [users, setUsers] = useState<UsersData[]>([]);
-    const [user, setUser] = useState<UsersData | undefined>(undefined);
 
     const [activePage, setActivePage] = useState<number>(1);
     const [pages, setPages] = useState<number>(0);
     const PAGES_TO_SHOW = 2;
     const REGISTERS_PER_PAGE = 5; // Es el mismo que params.limit
 
-    const getUsers = async () => {
+    const getPeople = async () => {
         try {
             setLoading(true);
-            const res = await getUsersService<UsersServiceData>(api, params);
-            setUsers(res.data);
+            const res = await getPeopleService<PeopleServiceData>(api, params);
+            setPeoples(res.data);
             setPages(Math.ceil(res.total_count / bParams.limit));
         } catch (err) {
             console.error(err);
@@ -48,11 +63,23 @@ const UsersTable = () => {
         }
     };
 
-    const paginateUsers = async (newParams: GetParams) => {
+    const getUsers = async () => {
+        try {
+            const res = await getUsersService<UsersServiceData>(api);
+            setUsers(res.data);
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    const paginatePeople = async (newParams: GetParams) => {
         try {
             setLoading(true);
-            const res = await getUsersService<UsersServiceData>(api, newParams);
-            setUsers(res.data);
+            const res = await getPeopleService<PeopleServiceData>(
+                api,
+                newParams,
+            );
+            setPeoples(res.data);
         } catch (err) {
             console.error(err);
         } finally {
@@ -79,68 +106,72 @@ const UsersTable = () => {
 
         setParams(newParams);
         setActivePage(page);
-        paginateUsers(newParams);
+        paginatePeople(newParams);
+    };
+
+    const reFetch = () => {
+        getPeople();
     };
 
     useEffect(() => {
+        getPeople();
         getUsers();
     }, []); // eslint-disable-line
 
     const titles = [
-        "First Name",
-        "Last Name",
-        "Username",
-        "Role",
+        "Name",
+        "Lastname",
         "Email",
         "Phone",
         "Address",
-        "Active",
+        "User",
+        "Photo",
     ];
 
     const body = useMemo(() => {
-        return users?.map((user) =>
+        return peoples?.map((st) =>
             Object.values({
-                first_name: user.first_name,
-                last_name: user.last_name,
-                username: user.username,
-                role: user.role.name,
-                email: user.email,
-                phone: user.phone,
-                address: user.address,
-                active: user.is_active,
+                // id: monument.id,
+                name: st.first_name,
+                lastname: st.last_name,
+                email: st.email,
+                phone: st.phone,
+                address: st.address,
+                user: users.find((u) => u.id === st.user)?.username,
+                photo: st.photo_actual_file,
             }),
         );
-    }, [users]);
+    }, [peoples]);
 
     useEffect(() => {
         modals?.show && showModal(modals.title);
     }, [modals]);
-
     return (
         <TableCard
-            title={"Users"}
-            addButtonTitle="+ User"
-            modalTitle="EditUsers"
-            addButton={true}
+            title={"Station People"}
+            size={"650px"}
+            addButtonTitle="+ Person"
+            modalTitle="EditPerson"
             setModals={setModals}
+            addButton={true}
         >
             <Table
                 titles={body && body.length > 0 ? titles : []}
                 body={body}
-                table={"Users"}
+                table={"people"}
                 loading={loading}
                 dataOnly={false}
                 onClickFunction={() =>
                     setModals({
                         show: true,
-                        title: "EditUsers",
+                        title: "EditPerson",
                         type: "edit",
                     })
                 }
-                setState={setUser}
-                state={users}
+                setState={setPeople}
+                state={peoples}
             />
-            {body ? (
+            {body && body.length > 0 ? (
                 <Pagination
                     pages={pages}
                     pagesToShow={PAGES_TO_SHOW}
@@ -148,18 +179,18 @@ const UsersTable = () => {
                     handlePage={handlePage}
                 />
             ) : null}
-
-            {modals?.show && modals.title === "EditUsers" && (
-                <UsersModal
-                    User={user}
+            {modals?.show && modals.title === "EditPerson" && (
+                <StationPeopleModal
+                    Person={people}
+                    users={users}
                     modalType={modals.type}
                     setStateModal={setModals}
-                    setUser={setUser}
-                    reFetch={getUsers}
+                    setPerson={setPeople}
+                    reFetch={reFetch}
                 />
             )}
         </TableCard>
     );
 };
 
-export default UsersTable;
+export default PeopleTable;

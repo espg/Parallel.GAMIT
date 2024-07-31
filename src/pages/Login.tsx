@@ -56,6 +56,8 @@ const Login = () => {
                 setMessage({ error: true, msg: error.message });
                 console.error(error);
             }
+        } finally {
+            setLoading(false);
         }
     };
 

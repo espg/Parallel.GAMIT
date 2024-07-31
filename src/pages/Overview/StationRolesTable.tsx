@@ -1,14 +1,20 @@
 import { useEffect, useMemo, useState } from "react";
-import { UsersModal, Pagination, Table } from "@componentsReact";
+import {
+    StationRoleModal,
+    Pagination,
+    Table,
+    TableCard,
+} from "@componentsReact";
 
-import { useAuth, useApi } from "@hooks";
-import { getUsersService } from "@services";
+import useApi from "@hooks/useApi";
+import { useAuth } from "@hooks/useAuth";
 
-import { GetParams, UsersData, UsersServiceData } from "@types";
+import { getStationRolesService } from "@services";
 import { showModal } from "@utils";
-import TableCard from "@components/table/TableCard";
 
-const UsersTable = () => {
+import { GetParams, StationStatus, StationStatusServiceData } from "@types";
+
+const StationRolesTable = () => {
     const { token, logout } = useAuth();
     const api = useApi(token, logout);
 
@@ -27,19 +33,24 @@ const UsersTable = () => {
     const [loading, setLoading] = useState<boolean>(false);
     const [params, setParams] = useState<GetParams>(bParams);
 
-    const [users, setUsers] = useState<UsersData[]>([]);
-    const [user, setUser] = useState<UsersData | undefined>(undefined);
+    const [stationRoles, setStationRoles] = useState<StationStatus[]>([]);
+    const [stationRole, setStationRole] = useState<StationStatus | undefined>(
+        undefined,
+    );
 
     const [activePage, setActivePage] = useState<number>(1);
     const [pages, setPages] = useState<number>(0);
     const PAGES_TO_SHOW = 2;
     const REGISTERS_PER_PAGE = 5; // Es el mismo que params.limit
 
-    const getUsers = async () => {
+    const getStationRoles = async () => {
         try {
             setLoading(true);
-            const res = await getUsersService<UsersServiceData>(api, params);
-            setUsers(res.data);
+            const res = await getStationRolesService<StationStatusServiceData>(
+                api,
+                params,
+            );
+            setStationRoles(res.data);
             setPages(Math.ceil(res.total_count / bParams.limit));
         } catch (err) {
             console.error(err);
@@ -48,11 +59,14 @@ const UsersTable = () => {
         }
     };
 
-    const paginateUsers = async (newParams: GetParams) => {
+    const paginateMonuments = async (newParams: GetParams) => {
         try {
             setLoading(true);
-            const res = await getUsersService<UsersServiceData>(api, newParams);
-            setUsers(res.data);
+            const res = await getStationRolesService<StationStatusServiceData>(
+                api,
+                newParams,
+            );
+            setStationRoles(res.data);
         } catch (err) {
             console.error(err);
         } finally {
@@ -79,66 +93,55 @@ const UsersTable = () => {
 
         setParams(newParams);
         setActivePage(page);
-        paginateUsers(newParams);
+        paginateMonuments(newParams);
+    };
+
+    const reFetch = () => {
+        getStationRoles();
     };
 
     useEffect(() => {
-        getUsers();
+        getStationRoles();
     }, []); // eslint-disable-line
 
-    const titles = [
-        "First Name",
-        "Last Name",
-        "Username",
-        "Role",
-        "Email",
-        "Phone",
-        "Address",
-        "Active",
-    ];
+    const titles = ["Name"];
 
     const body = useMemo(() => {
-        return users?.map((user) =>
+        return stationRoles?.map((sr) =>
             Object.values({
-                first_name: user.first_name,
-                last_name: user.last_name,
-                username: user.username,
-                role: user.role.name,
-                email: user.email,
-                phone: user.phone,
-                address: user.address,
-                active: user.is_active,
+                // id: monument.id,
+                name: sr.name,
             }),
         );
-    }, [users]);
+    }, [stationRoles]);
 
     useEffect(() => {
         modals?.show && showModal(modals.title);
     }, [modals]);
-
     return (
         <TableCard
-            title={"Users"}
-            addButtonTitle="+ User"
-            modalTitle="EditUsers"
-            addButton={true}
+            title={"Station Roles"}
+            size={"650px"}
+            addButtonTitle="+ Role"
+            modalTitle="EditStationRole"
             setModals={setModals}
+            addButton={true}
         >
             <Table
                 titles={body && body.length > 0 ? titles : []}
                 body={body}
-                table={"Users"}
+                table={"StationRole"}
                 loading={loading}
                 dataOnly={false}
                 onClickFunction={() =>
                     setModals({
                         show: true,
-                        title: "EditUsers",
+                        title: "EditStationRole",
                         type: "edit",
                     })
                 }
-                setState={setUser}
-                state={users}
+                setState={setStationRole}
+                state={stationRoles}
             />
             {body ? (
                 <Pagination
@@ -148,18 +151,17 @@ const UsersTable = () => {
                     handlePage={handlePage}
                 />
             ) : null}
-
-            {modals?.show && modals.title === "EditUsers" && (
-                <UsersModal
-                    User={user}
+            {modals?.show && modals.title === "EditStationRole" && (
+                <StationRoleModal
+                    Role={stationRole}
                     modalType={modals.type}
                     setStateModal={setModals}
-                    setUser={setUser}
-                    reFetch={getUsers}
+                    setRole={setStationRole}
+                    reFetch={reFetch}
                 />
             )}
         </TableCard>
     );
 };
 
-export default UsersTable;
+export default StationRolesTable;

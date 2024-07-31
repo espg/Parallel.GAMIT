@@ -1,30 +1,82 @@
-import { AuthProvider } from "@hooks/useAuth";
-import { Error, Login, Main, Users } from "@pagesReact";
-import { Station } from "@componentsReact";
+import { Error, Login, Main, Users, Station, Overview } from "@pagesReact";
+import { StationMain, StationPeople } from "@componentsReact";
 
-import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
+import {
+    Route,
+    createBrowserRouter,
+    RouterProvider,
+    createRoutesFromElements,
+} from "react-router-dom";
+
 import { ProtectedRoute, UnprotectedRoute } from "@routes/index";
+import { AuthProvider } from "@hooks/useAuth";
 
 function App() {
+    const router = createBrowserRouter(
+        createRoutesFromElements(
+            <>
+                <Route path="/auth" element={<UnprotectedRoute />}>
+                    <Route path="login" element={<Login />} />
+                    <Route path="*" element={<Error />} />
+                </Route>
+                <Route
+                    path="/"
+                    element={<ProtectedRoute />}
+                    handle={{
+                        crumb: () => {
+                            return "Home";
+                        },
+                    }}
+                >
+                    <Route index element={<Main />} />
+                    <Route
+                        path="overview"
+                        element={<Overview />}
+                        handle={{
+                            crumb: () => {
+                                return "overview";
+                            },
+                        }}
+                    />
+                    <Route
+                        path="users"
+                        element={<Users />}
+                        handle={{
+                            crumb: () => {
+                                return "Users";
+                            },
+                        }}
+                    />
+                    <Route
+                        path=":nc/:sc"
+                        element={<Station />}
+                        handle={{
+                            crumb: () => {
+                                return "Station";
+                            },
+                        }}
+                    >
+                        <Route index element={<StationMain />} />
+                        <Route
+                            path="people"
+                            element={<StationPeople />}
+                            handle={{
+                                crumb: () => {
+                                    return "People";
+                                },
+                            }}
+                        />
+                    </Route>
+                    <Route path="*" element={<Error />} />
+                </Route>
+            </>,
+        ),
+    );
+
     return (
-        <>
-            <Router>
-                <AuthProvider>
-                    <Routes>
-                        <Route path="/auth/" element={<UnprotectedRoute />}>
-                            <Route path="login" element={<Login />} />
-                            <Route path="*" element={<Error />} />
-                        </Route>
-                        <Route path="/" element={<ProtectedRoute />}>
-                            <Route path="/" element={<Main />} />
-                            <Route path="/:nc/:sc" element={<Station />} />
-                            <Route path="/users" element={<Users />} />
-                            <Route path="*" element={<Error />} />
-                        </Route>
-                    </Routes>
-                </AuthProvider>
-            </Router>
-        </>
+        <AuthProvider>
+            <RouterProvider router={router} />
+        </AuthProvider>
     );
 }
 

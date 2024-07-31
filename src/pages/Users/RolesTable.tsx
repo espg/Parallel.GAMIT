@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { AddRoleModal, Pagination, Table } from "@componentsReact";
+import { RoleModal, Pagination, Table, TableCard } from "@componentsReact";
 
 import { useAuth, useApi } from "@hooks";
 import { getRolesService } from "@services";
@@ -104,51 +104,40 @@ const RolesTable = () => {
     }, [modals]);
 
     return (
-        <div className="flex flex-col">
-            <div className="card bg-base-200 p-4 space-y-2">
-                <div className="flex w-full justify-between">
-                    <h2 className="card-title">Roles</h2>
-                    <button
-                        className="btn btn-neutral w-3/12 self-end no-animation"
-                        onClick={() =>
-                            setModals({
-                                show: true,
-                                title: "AddRole",
-                                type: "add",
-                            })
-                        }
-                    >
-                        {" "}
-                        + Role{" "}
-                    </button>
-                </div>
-                <Table
-                    titles={body ? titles : []}
-                    body={body}
-                    loading={loading}
-                    table={"Roles"}
-                    dataOnly={false}
-                    onClickFunction={() =>
-                        setModals({
-                            show: true,
-                            title: "AddRole",
-                            type: "edit",
-                        })
-                    }
-                    setState={setRole}
-                    state={roles}
+        <TableCard
+            title={"Roles"}
+            addButton={true}
+            addButtonTitle="+ Role"
+            modalTitle={"AddRole"}
+            setModals={setModals}
+        >
+            <Table
+                titles={body && body.length > 0 ? titles : []}
+                body={body}
+                loading={loading}
+                table={"Roles"}
+                dataOnly={false}
+                onClickFunction={() =>
+                    setModals({
+                        show: true,
+                        title: "AddRole",
+                        type: "edit",
+                    })
+                }
+                setState={setRole}
+                state={roles}
+            />
+            {body ? (
+                <Pagination
+                    pages={rolesPages}
+                    pagesToShow={PAGES_TO_SHOW}
+                    activePage={activeRolePage}
+                    handlePage={handleRolesPages}
                 />
-                {body ? (
-                    <Pagination
-                        pages={rolesPages}
-                        pagesToShow={PAGES_TO_SHOW}
-                        activePage={activeRolePage}
-                        handlePage={handleRolesPages}
-                    />
-                ) : null}
-            </div>
+            ) : null}
+
             {modals?.show && modals.title === "AddRole" ? (
-                <AddRoleModal
+                <RoleModal
                     Role={role}
                     modalType={modals.type}
                     reFetch={getRoles}
@@ -156,7 +145,8 @@ const RolesTable = () => {
                     setStateModal={setModals}
                 />
             ) : null}
-        </div>
+        </TableCard>
+        // </div>
     );
 };
 

@@ -7,7 +7,7 @@ import {
     useState,
 } from "react";
 
-import { useNavigate } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 
 import { useLocalStorage } from "@hooks/useLocalStorage";
 import useApi from "@hooks/useApi";
@@ -60,13 +60,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
     const [refresh, setRefresh] = useState<boolean | null>(null);
 
-    const navigate = useNavigate();
-
     const login = (token: string | null, nav?: boolean) => {
         if (token) {
             setToken(token);
             setRefresh(null);
-            navigate("/");
+            <Navigate to="/" replace />;
         }
         if (token && nav) {
             setToken(token);
@@ -87,7 +85,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         setRefreshToken(null);
         setRefresh(null);
         setRole(null);
-        if (href) navigate("/auth/login");
+        if (href) <Navigate to="/auth/login" />;
     };
 
     const getRole = (role: string) => {

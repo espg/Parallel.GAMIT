@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
+import { LatLngExpression } from "leaflet";
 import {
     Map,
     SearchInput,
     Sidebar,
     Skeleton,
+    Spinner,
     StationsModal,
 } from "@componentsReact";
 
@@ -11,9 +13,8 @@ import useApi from "@hooks/useApi";
 import { useAuth } from "@hooks/useAuth";
 
 import { getStationsService } from "@services";
+import { ChevronLeftIcon } from "@heroicons/react/24/outline";
 import { GetParams, StationData, StationServiceData } from "@types";
-import { LatLngExpression } from "leaflet";
-import { showModal } from "@utils/index";
 
 const MainPage = () => {
     const { token, logout } = useAuth();
@@ -30,12 +31,10 @@ const MainPage = () => {
         LatLngExpression | undefined
     >(undefined);
 
-    const [loading, setLoading] = useState<boolean>(true);
+    const [list, setList] = useState<boolean>(false);
 
-    const [modals, setModals] = useState<
-        | { show: boolean; title: string; type: "add" | "edit" | "none" }
-        | undefined
-    >(undefined);
+    const [loading, setLoading] = useState<boolean>(true);
+    const [spinner, setSpinner] = useState<boolean>(false);
 
     const getInitialStations = async () => {
         try {
@@ -55,6 +54,8 @@ const MainPage = () => {
     };
 
     const getStations = async () => {
+        setSpinner(true);
+
         try {
             // if (!params.country_code || !params.network_code) return;
             const result = await getStationsService<StationServiceData>(
@@ -69,6 +70,8 @@ const MainPage = () => {
             }
         } catch (err) {
             console.error(err);
+        } finally {
+            setSpinner(false);
         }
     };
 
@@ -85,10 +88,13 @@ const MainPage = () => {
 
     useEffect(() => {
         if (
-            initialStations &&
-            params.station_code === " " && // PARAMS RESETEADOS
-            params.country_code === " " &&
-            params.network_code === " "
+            (initialStations &&
+                params.station_code === " " && // PARAMS RESETEADOS
+                params.country_code === " " &&
+                params.network_code === " ") ||
+            (params.station_code === "" && // PARAMS RESETEADOS
+                params.country_code === "" &&
+                params.network_code === "")
         ) {
             setStations(initialStations);
         }
@@ -111,12 +117,8 @@ const MainPage = () => {
         }
     }, []);
 
-    useEffect(() => {
-        modals?.show && showModal(modals.title);
-    }, [modals]);
-
     return (
-        <div className={" my-auto flex transition-all duration-200"}>
+        <div className={"my-auto flex flex-1 transition-all duration-200"}>
             {loading ? (
                 <Skeleton />
             ) : (
@@ -126,10 +128,30 @@ const MainPage = () => {
                         setShow={setShowSidebar}
                         station={station}
                     />
-
                     <div
                         className={"self-center w-full flex flex-col flex-wrap"}
                     >
+                        <div
+                            className={`absolute right-0 z-50 h-4/6 flex items-center`}
+                        >
+                            {" "}
+                            <button
+                                className="btn"
+                                style={{
+                                    writingMode: "vertical-rl",
+                                    width: "50px",
+                                    height: "200px",
+                                    fontSize: "18px",
+                                }}
+                                onClick={() => {
+                                    setList(!list);
+                                }}
+                            >
+                                {" "}
+                                Station lists
+                                <ChevronLeftIcon className="h-6 w-6" />
+                            </button>{" "}
+                        </div>
                         <div className="flex justify-center flex-wrap items-center">
                             <SearchInput
                                 stations={stations}
@@ -137,28 +159,26 @@ const MainPage = () => {
                                 setParams={setParams}
                                 setStation={setStation}
                             />
-                            <button
-                                className="btn w-[10%] ml-6"
-                                onClick={() =>
-                                    setModals({
-                                        show: !modals?.show,
-                                        title: "Stations",
-                                        type: "none",
-                                    })
-                                }
-                            >
-                                Stations
-                            </button>
                         </div>
+                        {spinner && (
+                            <div className="absolute mt-28 right-52 z-50">
+                                {" "}
+                                <Spinner size={"lg"} />
+                            </div>
+                        )}
                         <Map
                             stations={stations ? stations : initialStations}
                             initialCenter={initialCenter}
                         />
+                        {list && (
+                            <div
+                                className={`fixed right-20   
+                                transition-all mt-[88px] h-fit flex z-50 `}
+                            >
+                                <StationsModal setState={setList} />
+                            </div>
+                        )}
                     </div>
-
-                    {modals?.show && modals.title === "Stations" && (
-                        <StationsModal setModalState={setModals} />
-                    )}
                 </>
             )}
         </div>

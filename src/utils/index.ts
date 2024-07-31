@@ -63,6 +63,26 @@ export const woTz = (d: Date | undefined) => {
     return dateWoTz;
 };
 
+export const doyToDate = (doy: string) => {
+    const [year, dayOfYear] = doy.split(".");
+
+    const date = new Date(`${year}-01-01`);
+
+    const leapYear =
+        (Number(year) % 4 == 0 && Number(year) % 100 != 0) ||
+        Number(year) % 400 == 0;
+
+    date.setTime(
+        date.getTime() +
+            (leapYear
+                ? (366 / 1000) * Number(dayOfYear)
+                : (365 / 1000) * Number(dayOfYear)) *
+                86400000,
+    );
+
+    return date;
+};
+
 export const dateFromDay = (day: string) => {
     const [year, dayOfYear] = day.split(" ");
     const date = new Date(`${year}-01-01`);
@@ -118,4 +138,22 @@ export const showModal = (title: string) => {
     if (modal) {
         modal.showModal();
     }
+};
+
+export const decimalToDMS = (coordinate: number, isLatitude: boolean) => {
+    const absolute = Math.abs(coordinate);
+    const degrees = Math.floor(absolute);
+    const minutesDecimal = (absolute - degrees) * 60;
+    const minutes = Math.floor(minutesDecimal);
+    const seconds = (minutesDecimal - minutes) * 60;
+
+    const direction = isLatitude
+        ? coordinate >= 0
+            ? "N"
+            : "S"
+        : coordinate >= 0
+          ? "E"
+          : "W";
+
+    return `${degrees}°${minutes}'${seconds.toFixed(4)}"${direction}`;
 };

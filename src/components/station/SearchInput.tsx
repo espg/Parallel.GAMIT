@@ -27,6 +27,8 @@ const SearchInput = ({ stations, params, setParams }: SearchInputProps) => {
     const { token, logout } = useAuth();
     const api = useApi(token, logout);
 
+    const navigate = useNavigate();
+
     const [countries, setCountries] = useState<CountriesData[] | undefined>(
         undefined,
     );
@@ -42,8 +44,6 @@ const SearchInput = ({ stations, params, setParams }: SearchInputProps) => {
     const [networkSelected, setNetworkSelected] = useState<string>("");
 
     const [dropdownClassnames, setDropdownClassnames] = useState("hidden");
-
-    const navigate = useNavigate();
 
     const getCountries = async () => {
         const result = await getCountriesService<CountriesServiceData>(api);
@@ -131,29 +131,38 @@ const SearchInput = ({ stations, params, setParams }: SearchInputProps) => {
     };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const searchInput = e.target.value;
+        const searchInput = e.target.value.trim();
 
-        if (searchInput.length === 0) {
+        const isInputEmpty = searchInput.length === 0;
+
+        if (isInputEmpty) {
             setDropdownClassnames("hidden");
+            setParams((prev) => ({
+                ...prev,
+                station_code: "",
+            }));
+        } else {
+            setParams({
+                ...params,
+                station_code: searchInput,
+            });
+
+            const filteredStations =
+                searchInput.length !== 0
+                    ? stations?.filter((station) =>
+                          station.station_code
+                              .toLowerCase()
+                              .includes(searchInput.toLowerCase()),
+                      )
+                    : stations;
+
+            const newClassnames =
+                filteredStations && filteredStations.length > 0
+                    ? "dropdown dropdown-open w-[80%] pt-2"
+                    : "hidden";
+
+            setDropdownClassnames(newClassnames);
         }
-
-        setParams({
-            ...params,
-            station_code: searchInput,
-        });
-
-        const filteredStations = stations?.filter((station) =>
-            station.station_code
-                .toLowerCase()
-                .includes(searchInput.toLowerCase().trim()),
-        );
-
-        const newClassnames =
-            filteredStations && filteredStations.length > 0
-                ? "dropdown dropdown-open w-[80%] pt-2"
-                : "hidden";
-
-        setDropdownClassnames(newClassnames);
     };
 
     const dropdownRef = useRef<HTMLDivElement | null>(null);
@@ -201,9 +210,9 @@ const SearchInput = ({ stations, params, setParams }: SearchInputProps) => {
                             setNetworkSelected("");
                             setParams({
                                 ...params,
-                                country_code: " ",
-                                network_code: " ",
-                                station_code: " ",
+                                country_code: "",
+                                network_code: "",
+                                station_code: "",
                             });
                         }}
                     >
