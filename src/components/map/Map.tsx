@@ -158,6 +158,7 @@ const Map = ({ stations, initialCenter }: MapProps) => {
 
         setMapProps((prevProps) => ({
             ...prevProps,
+            zoom: 8,
             center: pos,
         }));
     }, [stations]);

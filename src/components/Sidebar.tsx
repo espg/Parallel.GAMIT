@@ -19,8 +19,8 @@ import { showModal } from "@utils";
 interface SidebarProps {
     show: boolean;
     station: StationData | undefined;
-    stationMeta: StationMetadataServiceData | undefined;
-    refetch: () => void;
+    stationMeta?: StationMetadataServiceData | undefined;
+    refetch?: () => void;
     setShow: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
@@ -147,7 +147,7 @@ const Sidebar = ({
                     station={station}
                     stationMeta={stationMeta}
                     size={"xl"}
-                    refetch={refetch}
+                    refetch={refetch ? refetch : () => {}}
                     setModalState={setModals}
                 />
             )}

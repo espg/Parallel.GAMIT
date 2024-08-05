@@ -15,10 +15,20 @@ import { useAuth } from "@hooks/useAuth";
 import { getStationsService } from "@services";
 import { ChevronLeftIcon } from "@heroicons/react/24/outline";
 import { GetParams, StationData, StationServiceData } from "@types";
+import { useLocation } from "react-router-dom";
 
 const MainPage = () => {
     const { token, logout } = useAuth();
     const api = useApi(token, logout);
+
+    const location = useLocation();
+
+    const windowState = window.history.state.usr as StationData;
+
+    const locationState =
+        location.state && windowState
+            ? windowState
+            : (location.state as StationData);
 
     const [station, setStation] = useState<StationData | undefined>(undefined);
     const [stations, setStations] = useState<StationData[] | undefined>(
@@ -116,6 +126,17 @@ const MainPage = () => {
             getInitialStations();
         }
     }, []);
+
+    useEffect(() => {
+        const stateCoordinates =
+            locationState !== null && Object.values(locationState).length > 0
+                ? ([locationState?.lat, locationState?.lon] as LatLngExpression)
+                : ([0, 0] as LatLngExpression);
+
+        if (stateCoordinates) {
+            setInitialCenter(stateCoordinates);
+        }
+    }, [locationState]);
 
     return (
         <div className={"my-auto flex flex-1 transition-all duration-200"}>

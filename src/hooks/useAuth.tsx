@@ -12,7 +12,7 @@ import { Navigate } from "react-router-dom";
 import { useLocalStorage } from "@hooks/useLocalStorage";
 import useApi from "@hooks/useApi";
 
-import { jwtDeserializer } from "@utils/index";
+import { jwtDeserializer } from "@utils";
 import { getUserPhotoService } from "@services";
 
 interface AuthContextProps {

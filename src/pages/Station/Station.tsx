@@ -1,9 +1,18 @@
-import { Outlet, useLocation, useParams } from "react-router-dom";
+import {
+    NavigationType,
+    Outlet,
+    useLocation,
+    useNavigate,
+    useParams,
+} from "react-router-dom";
+import { router } from "App";
+
 import { useEffect, useState } from "react";
 
 import { Sidebar, Skeleton, Breadcrumb } from "@componentsReact";
 
 import { useAuth } from "@hooks/useAuth";
+
 import useApi from "@hooks/useApi";
 
 import { getStationMetaService, getStationsService } from "@services";
@@ -82,10 +91,32 @@ const Station = () => {
         }
     }, [station]);
 
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        if (station) {
+            const unsubscribe = router.subscribe((state) => {
+                if (state.historyAction === NavigationType.Pop) {
+                    if (state.location.pathname === "/") {
+                        navigate("/temp", { replace: true, state: {} });
+
+                        setTimeout(() => {
+                            navigate("/", { state: locationState });
+                        }, 0);
+                    }
+                }
+            });
+
+            return () => {
+                unsubscribe();
+            };
+        }
+    }, [station, locationState, navigate]);
+
     const stationTitle = station
-        ? station.network_code.toUpperCase() +
+        ? station?.network_code?.toUpperCase() +
           "." +
-          station.station_code.toUpperCase()
+          station?.station_code?.toUpperCase()
         : "Station not found";
 
     return (
@@ -101,7 +132,10 @@ const Station = () => {
                         refetch={refetch}
                         setShow={setShowSidebar}
                     />
-                    <Breadcrumb sidebar={showSidebar} />
+                    <Breadcrumb
+                        sidebar={showSidebar}
+                        state={station ? station : locationState}
+                    />
                     <div className="w-full flex flex-col pt-20 flex-wrap min-h-[92vh]">
                         <h1 className="text-6xl font-bold text-center">
                             {stationTitle}

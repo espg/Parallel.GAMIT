@@ -11,68 +11,68 @@ import {
 import { ProtectedRoute, UnprotectedRoute } from "@routes/index";
 import { AuthProvider } from "@hooks/useAuth";
 
-function App() {
-    const router = createBrowserRouter(
-        createRoutesFromElements(
-            <>
-                <Route path="/auth" element={<UnprotectedRoute />}>
-                    <Route path="login" element={<Login />} />
-                    <Route path="*" element={<Error />} />
-                </Route>
+const router = createBrowserRouter(
+    createRoutesFromElements(
+        <>
+            <Route path="/auth" element={<UnprotectedRoute />}>
+                <Route path="login" element={<Login />} />
+                <Route path="*" element={<Error />} />
+            </Route>
+            <Route
+                path="/"
+                element={<ProtectedRoute />}
+                handle={{
+                    crumb: () => {
+                        return "Home";
+                    },
+                }}
+            >
+                <Route index element={<Main />} />
                 <Route
-                    path="/"
-                    element={<ProtectedRoute />}
+                    path="overview"
+                    element={<Overview />}
                     handle={{
                         crumb: () => {
-                            return "Home";
+                            return "overview";
+                        },
+                    }}
+                />
+                <Route
+                    path="users"
+                    element={<Users />}
+                    handle={{
+                        crumb: () => {
+                            return "Users";
+                        },
+                    }}
+                />
+                <Route
+                    path=":nc/:sc"
+                    element={<Station />}
+                    handle={{
+                        crumb: () => {
+                            return "Station";
                         },
                     }}
                 >
-                    <Route index element={<Main />} />
+                    <Route index element={<StationMain />} />
                     <Route
-                        path="overview"
-                        element={<Overview />}
+                        path="people"
+                        element={<StationPeople />}
                         handle={{
                             crumb: () => {
-                                return "overview";
+                                return "People";
                             },
                         }}
                     />
-                    <Route
-                        path="users"
-                        element={<Users />}
-                        handle={{
-                            crumb: () => {
-                                return "Users";
-                            },
-                        }}
-                    />
-                    <Route
-                        path=":nc/:sc"
-                        element={<Station />}
-                        handle={{
-                            crumb: () => {
-                                return "Station";
-                            },
-                        }}
-                    >
-                        <Route index element={<StationMain />} />
-                        <Route
-                            path="people"
-                            element={<StationPeople />}
-                            handle={{
-                                crumb: () => {
-                                    return "People";
-                                },
-                            }}
-                        />
-                    </Route>
-                    <Route path="*" element={<Error />} />
                 </Route>
-            </>,
-        ),
-    );
+                <Route path="*" element={<Error />} />
+            </Route>
+        </>,
+    ),
+);
 
+function App() {
     return (
         <AuthProvider>
             <RouterProvider router={router} />
@@ -80,4 +80,5 @@ function App() {
     );
 }
 
+export { router };
 export default App;
