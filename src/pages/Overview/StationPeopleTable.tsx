@@ -129,18 +129,20 @@ const PeopleTable = () => {
     ];
 
     const body = useMemo(() => {
-        return peoples?.map((st) =>
-            Object.values({
-                // id: monument.id,
-                name: st.first_name,
-                lastname: st.last_name,
-                email: st.email,
-                phone: st.phone,
-                address: st.address,
-                user: users.find((u) => u.id === st.user)?.username,
-                photo: st.photo_actual_file,
-            }),
-        );
+        return peoples
+            ?.sort((a, b) => a.last_name.localeCompare(b.last_name))
+            .map((st) =>
+                Object.values({
+                    // id: monument.id,
+                    name: st.first_name,
+                    lastname: st.last_name,
+                    email: st.email,
+                    phone: st.phone,
+                    address: st.address,
+                    user: users.find((u) => u.id === st.user)?.username,
+                    photo: st.photo_actual_file,
+                }),
+            );
     }, [peoples]);
 
     useEffect(() => {

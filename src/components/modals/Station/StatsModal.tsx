@@ -39,10 +39,8 @@ import { STATION_INFO_STATE } from "@utils/reducerFormStates";
 import {
     apiOkStatuses,
     dateFromDay,
-    dateToUTC,
     dayFromDate,
     formattedDates,
-    isValidDate,
 } from "@utils/index";
 
 interface EditStatsModalProps {
@@ -93,6 +91,10 @@ const EditStatsModal = ({
         GamitHTCData[]
     >([]);
 
+    const [startDate, setStartDate] = useState<Date | null>(new Date());
+
+    const [endDate, setEndDate] = useState<Date | null>(new Date());
+
     const [doyCheck, setDoyCheck] = useState<
         { [key: string]: { check: boolean; input: string } } | undefined
     >({
@@ -102,10 +104,6 @@ const EditStatsModal = ({
         },
         date_end: { check: true, input: "" },
     });
-
-    const [startDate, setStartDate] = useState<Date | null>(new Date());
-
-    const [endDate, setEndDate] = useState<Date | null>(new Date());
 
     const [showMenu, setShowMenu] = useState<
         { type: string; show: boolean } | undefined
@@ -316,65 +314,6 @@ const EditStatsModal = ({
         }
     }, [formState.antenna_code]); // eslint-disable-line
 
-    const checkDoy = (doyKey: string, formStateKey: string) => {
-        if (
-            doyCheck?.[doyKey].check === true &&
-            formState[formStateKey] !== null &&
-            formState[formStateKey] !== "" &&
-            formState[formStateKey]
-        ) {
-            const doyArr = dayFromDate(formState?.[formStateKey]);
-
-            setDoyCheck({
-                ...doyCheck,
-                [doyKey]: {
-                    check: true,
-                    input: doyArr,
-                },
-            });
-
-            dispatch({
-                type: "change_value",
-                payload: {
-                    inputName: formStateKey,
-                    inputValue: dateFromDay(
-                        dayFromDate(formState?.[formStateKey]),
-                    )?.toISOString(),
-                },
-            });
-        }
-    };
-
-    useEffect(() => {
-        if (
-            doyCheck?.date_start.check &&
-            formState.date_start !== null &&
-            formState.date_start !== "" &&
-            formState.date_start
-        ) {
-            checkDoy("date_start", "date_start");
-        }
-
-        if (formState.date_start && isValidDate(formState.date_start)) {
-            setStartDate(dateToUTC(formState.date_start));
-        }
-    }, [formState.date_start]);
-
-    useEffect(() => {
-        if (
-            doyCheck?.date_end.check &&
-            formState.date_end !== null &&
-            formState.date_end !== "" &&
-            formState.date_end
-        ) {
-            checkDoy("date_end", "date_end");
-        }
-
-        if (formState.date_end && isValidDate(formState.date_end)) {
-            setEndDate(dateToUTC(formState.date_end));
-        }
-    }, [formState.date_end]);
-
     return (
         <Modal
             close={true}
@@ -437,8 +376,22 @@ const EditStatsModal = ({
                                             name={key}
                                             value={
                                                 inputsToDatePicker.includes(key)
-                                                    ? doyCheck?.[key]?.check
-                                                        ? doyCheck[key].input
+                                                    ? doyCheck?.[key]?.check // THIS CASE WHEN DOY IS CHECKED AND
+                                                        ? doyCheck[key].input // TO HANDLE THE DATE INPUT ON LOAD
+                                                              .trim() !== ""
+                                                            ? doyCheck[key]
+                                                                  .input
+                                                            : dayFromDate(
+                                                                    formState?.[
+                                                                        key as keyof typeof formState
+                                                                    ],
+                                                                ).trim() !== ""
+                                                              ? dayFromDate(
+                                                                    formState?.[
+                                                                        key as keyof typeof formState
+                                                                    ],
+                                                                )
+                                                              : ""
                                                         : inputsToDatePicker.includes(
                                                                 key,
                                                             ) &&
@@ -461,33 +414,40 @@ const EditStatsModal = ({
                                                       ] ?? ""
                                             }
                                             onChange={(e) => {
+                                                const inputValue =
+                                                    e.target.value;
                                                 const hasDoy =
                                                     (key === "date_start" ||
                                                         key === "date_end") &&
                                                     doyCheck?.[key].check;
-                                                hasDoy
-                                                    ? (setDoyCheck({
-                                                          ...doyCheck,
-                                                          [key]: {
-                                                              check: true,
-                                                              input:
-                                                                  e.target
-                                                                      .value ??
-                                                                  0,
-                                                          },
-                                                      }),
-                                                      dispatch({
-                                                          type: "change_value",
-                                                          payload: {
-                                                              inputName: key,
-                                                              inputValue:
-                                                                  dateFromDay(
-                                                                      e.target
-                                                                          .value,
-                                                                  )?.toISOString(),
-                                                          },
-                                                      }))
-                                                    : handleChange(e);
+
+                                                if (hasDoy) {
+                                                    setDoyCheck({
+                                                        ...doyCheck,
+                                                        [key]: {
+                                                            check: true,
+                                                            input:
+                                                                inputValue ?? 0,
+                                                        },
+                                                    });
+
+                                                    const dateValue = inputValue
+                                                        ? dateFromDay(
+                                                              inputValue,
+                                                          )?.toISOString()
+                                                        : null;
+
+                                                    dispatch({
+                                                        type: "change_value",
+                                                        payload: {
+                                                            inputName: key,
+                                                            inputValue:
+                                                                dateValue ?? "",
+                                                        },
+                                                    });
+                                                } else {
+                                                    handleChange(e);
+                                                }
                                             }}
                                             className="grow "
                                             autoComplete="off"
@@ -501,7 +461,7 @@ const EditStatsModal = ({
                                             }
                                             placeholder={
                                                 inputsToDatePicker.includes(key)
-                                                    ? "YYYY DOY"
+                                                    ? "YYYY DDD HH MM SS"
                                                     : ""
                                             }
                                         />

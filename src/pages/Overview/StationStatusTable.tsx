@@ -106,12 +106,14 @@ const StationStatusTable = () => {
     const titles = ["Name"];
 
     const body = useMemo(() => {
-        return stationStatus?.map((st) =>
-            Object.values({
-                // id: monument.id,
-                name: st.name,
-            }),
-        );
+        return stationStatus
+            ?.sort((a, b) => a.name.localeCompare(b.name))
+            .map((st) =>
+                Object.values({
+                    // id: monument.id,
+                    name: st.name,
+                }),
+            );
     }, [stationStatus]);
 
     useEffect(() => {

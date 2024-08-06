@@ -427,7 +427,7 @@ const StationMetadataModal = ({
                                                 return (
                                                     <div key={idx}>
                                                         <div className="text-sm font-bold flex items-center">
-                                                            {generalFields[idx]}
+                                                            {generalFields[idx]}{" "}
                                                             <div
                                                                 className={`size-3  rounded-full ml-3`}
                                                                 title={
@@ -522,7 +522,9 @@ const StationMetadataModal = ({
                                                         showMenu.type === key &&
                                                         key ===
                                                             "monument_type" ? (
-                                                            <Menu>
+                                                            <Menu
+                                                                absolute={true}
+                                                            >
                                                                 {(matchingMonuments.length >
                                                                 0
                                                                     ? matchingMonuments
@@ -553,7 +555,9 @@ const StationMetadataModal = ({
                                                               key &&
                                                           key ===
                                                               "station_type" ? (
-                                                            <Menu>
+                                                            <Menu
+                                                                absolute={true}
+                                                            >
                                                                 {(matchingTypes.length >
                                                                 0
                                                                     ? matchingTypes
@@ -585,7 +589,11 @@ const StationMetadataModal = ({
                                                                 key &&
                                                             key ===
                                                                 "status" && (
-                                                                <Menu>
+                                                                <Menu
+                                                                    absolute={
+                                                                        true
+                                                                    }
+                                                                >
                                                                     {(matchingStatus.length >
                                                                     0
                                                                         ? matchingStatus
@@ -1084,47 +1092,16 @@ const StationMetadataModal = ({
                                                                 ]
                                                             }
                                                         </div>
-                                                        {edit ? (
-                                                            <div className="flex flex-col space-y-1">
-                                                                <label
-                                                                    className={`input input-bordered flex items-center`}
-                                                                >
-                                                                    <input
-                                                                        className="w-full"
-                                                                        autoComplete="off"
-                                                                        type="text"
-                                                                        value={
-                                                                            formState
-                                                                                .equipment[
-                                                                                key as keyof typeof formState.equipment
-                                                                            ] ??
-                                                                            ""
-                                                                        }
-                                                                        name={
-                                                                            "equipment." +
-                                                                            key
-                                                                        }
-                                                                        onChange={(
-                                                                            e,
-                                                                        ) =>
-                                                                            handleChange(
-                                                                                e,
-                                                                            )
-                                                                        }
-                                                                    />
-                                                                </label>
-                                                            </div>
-                                                        ) : (
-                                                            <p>
-                                                                {value ? (
-                                                                    value
-                                                                ) : (
-                                                                    <span className="text-gray-400">
-                                                                        No {key}
-                                                                    </span>
-                                                                )}
-                                                            </p>
-                                                        )}
+
+                                                        <p>
+                                                            {value ? (
+                                                                value
+                                                            ) : (
+                                                                <span className="text-gray-400">
+                                                                    No {key}
+                                                                </span>
+                                                            )}
+                                                        </p>
                                                     </div>
                                                 );
                                             }

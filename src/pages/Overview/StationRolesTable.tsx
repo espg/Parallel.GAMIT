@@ -107,12 +107,14 @@ const StationRolesTable = () => {
     const titles = ["Name"];
 
     const body = useMemo(() => {
-        return stationRoles?.map((sr) =>
-            Object.values({
-                // id: monument.id,
-                name: sr.name,
-            }),
-        );
+        return stationRoles
+            ?.sort((a, b) => a.name.localeCompare(b.name))
+            .map((sr) =>
+                Object.values({
+                    // id: monument.id,
+                    name: sr.name,
+                }),
+            );
     }, [stationRoles]);
 
     useEffect(() => {

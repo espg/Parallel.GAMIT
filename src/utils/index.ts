@@ -84,23 +84,44 @@ export const doyToDate = (doy: string) => {
 };
 
 export const dateFromDay = (day: string) => {
-    const [year, dayOfYear] = day.split(" ");
-    const date = new Date(`${year}-01-01`);
+    const [year, dayOfYear = "001", hours = "0", minutes = "0", seconds = "0"] =
+        day.split(" ");
+
+    // Asegurarse de que el día del año tenga 3 dígitos
+    const formattedDayOfYear = dayOfYear?.padStart(3, "0");
+    // Asegurarse de que las horas, minutos y segundos tengan 2 dígitos
+    const formattedHours = hours.padStart(2, "0");
+    const formattedMinutes = minutes.padStart(2, "0");
+    const formattedSeconds = seconds.padStart(2, "0");
+
+    const date = new Date(
+        `${year}-01-01T${formattedHours}:${formattedMinutes}:${formattedSeconds}Z`,
+    );
     // Corrección: Sumar los días como milisegundos al 1 de enero del año dado
-    date.setTime(date.getTime() + (Number(dayOfYear) - 1) * 86400000);
+    date.setTime(date.getTime() + (Number(formattedDayOfYear) - 1) * 86400000);
     return date;
 };
 
 export const dayFromDate = (date: Date | string) => {
-    // const now = new Date();
     const dateObj = new Date(date);
     const startOfYear = new Date(Date.UTC(dateObj.getUTCFullYear(), 0, 1));
     const diff = dateObj.getTime() - startOfYear.getTime();
     const oneDay = 86400000; // milisegundos en un día
-    // Calcular el día del año
     const dayOfYear = Math.floor(diff / oneDay) + 1; // +1 porque el día 1 del año es 1, no 0
-    // Si no hay datos devuelve el año actual y el dia 1
-    return `${isNaN(dateObj.getUTCFullYear()) ? "" : dateObj.getUTCFullYear()} ${isNaN(dayOfYear) ? "" : dayOfYear}`;
+
+    const year = isNaN(dateObj.getUTCFullYear())
+        ? ""
+        : dateObj.getUTCFullYear();
+    const day = isNaN(dayOfYear) ? "" : dayOfYear;
+    const hours = isNaN(dateObj.getUTCHours()) ? "" : dateObj.getUTCHours();
+    const minutes = isNaN(dateObj.getUTCMinutes())
+        ? ""
+        : dateObj.getUTCMinutes();
+    const seconds = isNaN(dateObj.getUTCSeconds())
+        ? ""
+        : dateObj.getUTCSeconds();
+
+    return `${year} ${day} ${hours} ${minutes} ${seconds}`;
     // return `${
     //     isNaN(dateObj.getUTCFullYear())
     //         ? new Date().getUTCFullYear()

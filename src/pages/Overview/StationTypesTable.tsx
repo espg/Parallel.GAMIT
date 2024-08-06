@@ -107,12 +107,14 @@ const StationTypesTable = () => {
     const titles = ["Name"];
 
     const body = useMemo(() => {
-        return stationTypes?.map((st) =>
-            Object.values({
-                // id: monument.id,
-                name: st.name,
-            }),
-        );
+        return stationTypes
+            ?.sort((a, b) => a.name.localeCompare(b.name))
+            .map((st) =>
+                Object.values({
+                    // id: monument.id,
+                    name: st.name,
+                }),
+            );
     }, [stationTypes]);
 
     useEffect(() => {

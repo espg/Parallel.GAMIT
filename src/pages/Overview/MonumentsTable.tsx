@@ -105,13 +105,15 @@ const MonumentsTable = () => {
     const titles = ["Name", "Photo"];
 
     const body = useMemo(() => {
-        return monuments?.map((monument) =>
-            Object.values({
-                // id: monument.id,
-                name: monument.name,
-                photo: monument.photo_file,
-            }),
-        );
+        return monuments
+            ?.sort((a, b) => a.name.localeCompare(b.name))
+            .map((monument) =>
+                Object.values({
+                    // id: monument.id,
+                    name: monument.name,
+                    photo: monument.photo_file,
+                }),
+            );
     }, [monuments]);
 
     useEffect(() => {
