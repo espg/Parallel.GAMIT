@@ -131,7 +131,7 @@ const MainPage = () => {
         const stateCoordinates =
             locationState !== null && Object.values(locationState).length > 0
                 ? ([locationState?.lat, locationState?.lon] as LatLngExpression)
-                : ([0, 0] as LatLngExpression);
+                : undefined;
 
         if (stateCoordinates) {
             setInitialCenter(stateCoordinates);
@@ -196,7 +196,10 @@ const MainPage = () => {
                                 className={`fixed right-20   
                                 transition-all mt-[88px] h-fit flex z-50 `}
                             >
-                                <StationsModal setState={setList} />
+                                <StationsModal
+                                    setState={setList}
+                                    stations={stations}
+                                />
                             </div>
                         )}
                     </div>

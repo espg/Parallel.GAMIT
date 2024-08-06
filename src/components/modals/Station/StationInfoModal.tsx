@@ -54,21 +54,16 @@ const StationInfoModal = ({
     } = stationInfos?.[0] || {};
 
     const titles = Object.keys(restOfStationInfo || {});
-    const tableData = stationInfos
-        ?.sort(
-            (a, b) =>
-                new Date(b.date_end).getTime() - new Date(a.date_end).getTime(),
-        )
-        ?.map(
-            ({
-                api_id, // eslint-disable-line
-                network_code, // eslint-disable-line
-                station_code, // eslint-disable-line
-                ...restOfStationInfo
-            }: StationInfoData) => {
-                return Object.values(restOfStationInfo);
-            },
-        );
+    const tableData = stationInfos?.map(
+        ({
+            api_id, // eslint-disable-line
+            network_code, // eslint-disable-line
+            station_code, // eslint-disable-line
+            ...restOfStationInfo
+        }: StationInfoData) => {
+            return Object.values(restOfStationInfo);
+        },
+    );
 
     const bParams: GetParams = useMemo(() => {
         return {

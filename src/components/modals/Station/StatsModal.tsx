@@ -398,7 +398,7 @@ const EditStatsModal = ({
                             "station_code",
                         ];
                         const inputsToDatePicker = ["date_start", "date_end"];
-                        const errorBadge = msg?.errors?.errors.find(
+                        const errorBadge = msg?.errors?.errors?.find(
                             (error) => error.attr === key,
                         );
 

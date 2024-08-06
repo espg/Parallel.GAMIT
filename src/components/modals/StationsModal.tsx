@@ -2,24 +2,19 @@ import { useEffect, useMemo, useState } from "react";
 
 import { Pagination, Table } from "@componentsReact";
 
-import { GetParams, StationData, StationServiceData } from "@types";
-
-import { getStationsService } from "@services";
-import { useAuth } from "@hooks/useAuth";
-import useApi from "@hooks/useApi";
 import { XMarkIcon } from "@heroicons/react/24/outline";
+
+import { GetParams, StationData } from "@types";
 
 interface Props {
     setState: React.Dispatch<React.SetStateAction<boolean>>;
+    stations: StationData[] | undefined;
 }
 
-const StationsModal = ({ setState }: Props) => {
-    const { token, logout } = useAuth();
-    const api = useApi(token, logout);
-
-    const [stations, setStations] = useState<StationData[] | undefined>(
-        undefined,
-    );
+const StationsModal = ({ setState, stations }: Props) => {
+    const [paginatedStations, setPaginatedStations] = useState<
+        StationData[] | undefined
+    >(undefined);
 
     const bParams: GetParams = useMemo(() => {
         return {
@@ -29,7 +24,6 @@ const StationsModal = ({ setState }: Props) => {
     }, []);
 
     const [params, setParams] = useState<GetParams>(bParams);
-    const [loading, setLoading] = useState<boolean>(false);
 
     // PAGINATION... HEADACHE
     const [activePage, setActivePage] = useState<number>(1);
@@ -37,36 +31,18 @@ const StationsModal = ({ setState }: Props) => {
     const PAGES_TO_SHOW = 2;
     const REGISTERS_PER_PAGE = 5; // Es el mismo que params.limit
 
-    const getStations = async () => {
-        try {
-            setLoading(true);
-            const res = await getStationsService<StationServiceData>(
-                api,
-                bParams,
+    useEffect(() => {
+        if (stations) {
+            setPages(Math.ceil(stations?.length / REGISTERS_PER_PAGE));
+            setPaginatedStations(
+                stations
+                    .sort((a, b) =>
+                        a.station_code.localeCompare(b.station_code),
+                    )
+                    .slice(0, REGISTERS_PER_PAGE),
             );
-            setStations(res.data);
-            setPages(Math.ceil(res.total_count / bParams.limit));
-        } catch (err) {
-            console.error(err);
-        } finally {
-            setLoading(false);
         }
-    };
-
-    const paginateStations = async (newParams: GetParams) => {
-        try {
-            setLoading(true);
-            const res = await getStationsService<StationServiceData>(
-                api,
-                newParams,
-            );
-            setStations(res.data);
-        } catch (err) {
-            console.error(err);
-        } finally {
-            setLoading(false);
-        }
-    };
+    }, [stations]);
 
     const handlePage = (page: number) => {
         if (page < 1 || page > pages) return;
@@ -87,55 +63,60 @@ const StationsModal = ({ setState }: Props) => {
 
         setParams(newParams);
         setActivePage(page);
-        paginateStations(newParams);
+        setPaginatedStations(
+            stations
+                ?.sort((a, b) => a.station_code.localeCompare(b.station_code))
+                .slice(
+                    REGISTERS_PER_PAGE * (page - 1),
+                    REGISTERS_PER_PAGE * page,
+                ),
+        );
     };
-
-    useEffect(() => {
-        getStations();
-    }, []); // eslint-disable-line
 
     const bTitles = {
         station: String,
         country_code: String,
         station_name: String,
-        dome: String,
         lat: Number,
         lon: Number,
+        dome: String,
     };
 
     const titles = Object.keys(bTitles || {});
 
     /* eslint-disable */
-    const tableData = stations?.map(
-        ({
-            harpos_coeff_otl,
-            date_start,
-            date_end,
-            marker,
-            api_id,
-            auto_x,
-            auto_y,
-            auto_z,
-            height,
-            max_dist,
-            // station_code,
-            // network_code,
-            ...st
-        }: StationData) => {
-            const orderedStation = {
-                station:
-                    st.station_code.toUpperCase() +
-                    "." +
-                    st.network_code.toUpperCase(),
-                country_code: st.country_code,
-                station_name: st.station_name,
-                lat: st.lat,
-                lon: st.lon,
-                dome: st.dome,
-            };
-            return Object.values(orderedStation);
-        },
-    );
+    const tableData = paginatedStations
+        ?.sort((a, b) => a.station_code.localeCompare(b.station_code))
+        .map(
+            ({
+                harpos_coeff_otl,
+                date_start,
+                date_end,
+                marker,
+                api_id,
+                auto_x,
+                auto_y,
+                auto_z,
+                height,
+                max_dist,
+                // station_code,
+                // network_code,
+                ...st
+            }: StationData) => {
+                const orderedStation = {
+                    station:
+                        st.station_code.toUpperCase() +
+                        "." +
+                        st.network_code.toUpperCase(),
+                    country_code: st.country_code,
+                    station_name: st.station_name,
+                    lat: st.lat?.toFixed(8) ?? "-",
+                    lon: st.lon?.toFixed(8) ?? "-",
+                    dome: st.dome,
+                };
+                return Object.values(orderedStation);
+            },
+        );
     /* eslint-enable */
 
     return (
@@ -158,7 +139,6 @@ const StationsModal = ({ setState }: Props) => {
                 <Table
                     titles={titles}
                     body={tableData}
-                    loading={loading}
                     table={"Stations"}
                     dataOnly={true}
                     onClickFunction={() => undefined}

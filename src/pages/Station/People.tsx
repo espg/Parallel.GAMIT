@@ -137,12 +137,10 @@ const People = () => {
         getRoles();
     }, []); // eslint-disable-line
 
-    //TODO: TERMINAR EL MODAL PARA ELIMINAR PERSONA
-
     const titles = ["Role", "Name", "Last Name", "Email", "Address"];
 
     const body = useMemo(() => {
-        return rolePersonStations?.map((rp) =>
+        const b = rolePersonStations?.map((rp) =>
             Object.values({
                 // id: monument.id,
                 role: roles?.find((r) => r.id === rp.role)?.name,
@@ -152,7 +150,21 @@ const People = () => {
                 address: people.find((p) => p.id === rp.person)?.address,
             }),
         );
-    }, [rolePersonStations, people]); // eslint-disable-line
+
+        if (!b) return [];
+        return b?.sort((a, b) => {
+            const aValue = a[2] || "";
+            const bValue = b[2] || "";
+
+            if (aValue < bValue) {
+                return -1;
+            }
+            if (aValue > bValue) {
+                return 1;
+            }
+            return 0;
+        });
+    }, [rolePersonStations, people, roles]);
 
     useEffect(() => {
         modals?.show && showModal(modals.title);
