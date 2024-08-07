@@ -7,3 +7,14 @@
 .margin-custom > :nth-child(3) {
     @apply mr-4;
 }
+
+input[type="time"]::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+}
+input[type="date"]::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+}
+
+input[type="date"] {
+    width: 90%;
+}

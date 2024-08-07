@@ -210,7 +210,10 @@ const StationInfoModal = ({
                 <StatsModal
                     stationInfo={stationInfo}
                     modalType={modals.type}
-                    reFetch={getStationInfo}
+                    reFetch={() => {
+                        setActivePage(1);
+                        getStationInfo();
+                    }}
                     setStateModal={setModals}
                     setStationInfo={setStationInfo}
                 />

@@ -103,6 +103,10 @@ export const dateFromDay = (day: string) => {
 };
 
 export const dayFromDate = (date: Date | string) => {
+    if (date === null) {
+        return null;
+    }
+
     const dateObj = new Date(date);
     const startOfYear = new Date(Date.UTC(dateObj.getUTCFullYear(), 0, 1));
     const diff = dateObj.getTime() - startOfYear.getTime();

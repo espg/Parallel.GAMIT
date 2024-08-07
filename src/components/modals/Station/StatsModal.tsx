@@ -39,6 +39,7 @@ import { STATION_INFO_STATE } from "@utils/reducerFormStates";
 import {
     apiOkStatuses,
     dateFromDay,
+    dateToUTC,
     dayFromDate,
     formattedDates,
 } from "@utils/index";
@@ -202,9 +203,12 @@ const EditStatsModal = ({
     const postStationInfo = async () => {
         try {
             setLoading(true);
+
+            const { date_end, ...rest } = formState;
+
             const res = await postStationInfoService<
                 ExtendedStationInfoData | ErrorResponse
-            >(api, formState);
+            >(api, date_end.trim() === "" ? rest : formState);
 
             if (res) {
                 if ("status" in res) {
@@ -230,6 +234,10 @@ const EditStatsModal = ({
     const putStationInfo = async () => {
         try {
             setLoading(true);
+
+            formState.date_end =
+                formState.date_end.trim() === "" ? null : formState.date_end;
+
             const res = await putStationInfoService<
                 ExtendedStationInfoData | ErrorResponse
             >(api, Number(formState.api_id), formState);
@@ -314,6 +322,18 @@ const EditStatsModal = ({
         }
     }, [formState.antenna_code]); // eslint-disable-line
 
+    useEffect(() => {
+        if (formState.date_start && formState.date_start !== null) {
+            setStartDate(dateToUTC(formState.date_start));
+        }
+    }, [formState.date_start]);
+
+    useEffect(() => {
+        if (formState.date_end && formState.date_end !== null) {
+            setEndDate(dateToUTC(formState.date_end));
+        }
+    }, [formState.date_end]);
+
     return (
         <Modal
             close={true}
@@ -376,21 +396,22 @@ const EditStatsModal = ({
                                             name={key}
                                             value={
                                                 inputsToDatePicker.includes(key)
-                                                    ? doyCheck?.[key]?.check // THIS CASE WHEN DOY IS CHECKED AND
-                                                        ? doyCheck[key].input // TO HANDLE THE DATE INPUT ON LOAD
-                                                              .trim() !== ""
+                                                    ? doyCheck?.[key]?.check
+                                                        ? doyCheck[
+                                                              key
+                                                          ].input.trim() !== ""
                                                             ? doyCheck[key]
                                                                   .input
                                                             : dayFromDate(
                                                                     formState?.[
                                                                         key as keyof typeof formState
                                                                     ],
-                                                                ).trim() !== ""
+                                                                )?.trim() !== ""
                                                               ? dayFromDate(
                                                                     formState?.[
                                                                         key as keyof typeof formState
                                                                     ],
-                                                                )
+                                                                ) ?? ""
                                                               : ""
                                                         : inputsToDatePicker.includes(
                                                                 key,
@@ -460,7 +481,9 @@ const EditStatsModal = ({
                                                 ) && !doyCheck?.[key].check
                                             }
                                             placeholder={
-                                                inputsToDatePicker.includes(key)
+                                                inputsToDatePicker.includes(
+                                                    key,
+                                                ) && doyCheck?.[key].check
                                                     ? "YYYY DDD HH MM SS"
                                                     : ""
                                             }
@@ -513,11 +536,12 @@ const EditStatsModal = ({
                                                                 check: !doyCheck?.[
                                                                     key
                                                                 ].check,
-                                                                input: dayFromDate(
-                                                                    formState?.[
-                                                                        key as keyof typeof formState
-                                                                    ] ?? "",
-                                                                ),
+                                                                input:
+                                                                    dayFromDate(
+                                                                        formState?.[
+                                                                            key as keyof typeof formState
+                                                                        ],
+                                                                    ) ?? "",
                                                             },
                                                         });
                                                     }}

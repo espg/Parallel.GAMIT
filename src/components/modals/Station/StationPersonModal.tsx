@@ -212,6 +212,8 @@ const StationPersonModal = ({
 
                         const keysToMenu: string[] = ["person", "role"];
 
+                        console.log(matchingPeople, people);
+
                         // const optionalFields: string[] = ["photo", "user"];
                         return (
                             <div className="flex flex-col" key={key + index}>
