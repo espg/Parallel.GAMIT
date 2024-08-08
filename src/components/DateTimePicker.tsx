@@ -20,29 +20,34 @@ const DateTimePicker = ({
 }: DatetimePickerProps) => {
     const CustomTimeInput = ({
         date,
+        typeKey,
         onChangeCustom,
     }: {
         date: Date | null;
-        onChangeCustom: (date: Date, time: string) => void;
+        typeKey: string;
+        onChangeCustom: (date: Date, time: string, typeKey: string) => void;
     }) => {
+        const defaultTime = typeKey === "date_end" ? "23:59:59" : "00:00:00";
         const value =
-            date instanceof Date ? date.toLocaleTimeString("it-IT") : "";
+            date instanceof Date
+                ? date.toLocaleTimeString("it-IT")
+                : defaultTime;
         return (
             <input
                 type="time"
                 step="1"
                 value={value}
                 onChange={(e) =>
-                    onChangeCustom(date ?? new Date(), e.target.value)
+                    onChangeCustom(date ?? new Date(), e.target.value, typeKey)
                 }
             />
         );
     };
 
-    const handleChangeTime = (date: Date, time: string) => {
+    const handleChangeTime = (date: Date, time: string, typeKey: string) => {
         const [hh, mm, ss] = time.split(":");
         const targetDate = date instanceof Date ? date : new Date();
-        targetDate.setHours(Number(hh) || 0, Number(mm) || 0, Number(ss) || 0);
+        targetDate.setHours(Number(hh), Number(mm), Number(ss));
         if (typeKey === "date_start") {
             setStartDate(targetDate);
         } else {
@@ -60,12 +65,36 @@ const DateTimePicker = ({
         });
     };
 
+    const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const targetIsoDate =
+            e.target.value +
+            (typeKey === "date_start" ? "T00:00:00" : "T23:59:59");
+
+        const newDate = new Date(targetIsoDate);
+
+        if (newDate) {
+            if (typeKey === "date_start") {
+                setStartDate(newDate);
+            } else {
+                setEndDate(newDate);
+            }
+
+            const dateWoTZ = new Date(woTz(newDate) ?? "").toISOString();
+            dispatch({
+                type: "change_value",
+                payload: {
+                    inputName: typeKey,
+                    inputValue: dateWoTZ,
+                },
+            });
+        }
+    };
+
     return (
         <>
             <div className="badge badge-ghost">
                 <input
                     type="date"
-                    // selected={typeKey === "date_start" ? startDate : endDate}
                     defaultValue={
                         typeKey === "date_start" && startDate
                             ? startDate.toISOString().split("T")[0]
@@ -73,25 +102,7 @@ const DateTimePicker = ({
                               ? endDate.toISOString().split("T")[0]
                               : ""
                     }
-                    onChange={(e) => {
-                        const date = new Date(e.target.value);
-                        if (date) {
-                            const dateWoTZ = date.toISOString();
-
-                            if (typeKey === "date_start") {
-                                setStartDate(date);
-                            } else {
-                                setEndDate(date);
-                            }
-                            dispatch({
-                                type: "change_value",
-                                payload: {
-                                    inputName: typeKey,
-                                    inputValue: dateWoTZ,
-                                },
-                            });
-                        }
-                    }}
+                    onChange={handleDateChange}
                 />
             </div>
 
@@ -99,6 +110,7 @@ const DateTimePicker = ({
                 <CustomTimeInput
                     date={typeKey === "date_start" ? startDate : endDate}
                     onChangeCustom={handleChangeTime}
+                    typeKey={typeKey}
                 />
             </div>
         </>

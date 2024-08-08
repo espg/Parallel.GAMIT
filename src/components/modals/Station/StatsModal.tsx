@@ -92,9 +92,9 @@ const EditStatsModal = ({
         GamitHTCData[]
     >([]);
 
-    const [startDate, setStartDate] = useState<Date | null>(new Date());
+    const [startDate, setStartDate] = useState<Date | null>(null);
 
-    const [endDate, setEndDate] = useState<Date | null>(new Date());
+    const [endDate, setEndDate] = useState<Date | null>(null);
 
     const [doyCheck, setDoyCheck] = useState<
         { [key: string]: { check: boolean; input: string } } | undefined
@@ -342,15 +342,36 @@ const EditStatsModal = ({
         }
     }, [formState.date_end]);
 
+    const closeModal = () => {
+        setStationInfo(undefined);
+        reFetch();
+        dispatch({
+            type: "set",
+            payload: STATION_INFO_STATE,
+        });
+    };
+
+    // TODO: Refactor this to a custom hook
+
+    useEffect(() => {
+        const handleEsc = (event) => {
+            if (event.key === "Escape") {
+                closeModal();
+            }
+        };
+        window.addEventListener("keydown", handleEsc);
+
+        return () => {
+            window.removeEventListener("keydown", handleEsc);
+        };
+    }, []);
+
     return (
         <Modal
             close={true}
             modalId={"EditStats"}
             size={"md"}
-            handleCloseModal={() => {
-                setStationInfo(undefined);
-                reFetch();
-            }}
+            handleCloseModal={closeModal}
             setModalState={setStateModal}
         >
             <h3 className="font-bold text-center text-2xl my-2 w-full">
