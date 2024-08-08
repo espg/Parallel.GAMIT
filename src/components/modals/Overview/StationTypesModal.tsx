@@ -294,13 +294,14 @@ const StationTypesModal = ({
                     msg={msg}
                     loading={loading}
                     confirmRemove={() => delStatus()}
-                    closeModal={() =>
+                    closeModal={() => {
                         setModals({
                             show: false,
                             title: "",
                             type: "edit",
-                        })
-                    }
+                        });
+                        setMsg(undefined);
+                    }}
                 />
             )}
         </Modal>

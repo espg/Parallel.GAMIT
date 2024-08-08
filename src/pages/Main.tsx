@@ -45,6 +45,7 @@ const MainPage = () => {
 
     const [loading, setLoading] = useState<boolean>(true);
     const [spinner, setSpinner] = useState<boolean>(false);
+    const [stationsUpdated, setStationsUpdated] = useState<boolean>(false);
 
     const getInitialStations = async () => {
         try {
@@ -74,8 +75,13 @@ const MainPage = () => {
             );
             if (result) {
                 setStations(result.data);
+                setStationsUpdated(true);
                 if (result.data?.length > 0) {
-                    setInitialCenter([result.data[0].lat, result.data[0].lon]);
+                    result.data.find((s) => {
+                        if (s.lat && s.lon) {
+                            setInitialCenter([s.lat, s.lon]);
+                        }
+                    });
                 }
             }
         } catch (err) {
@@ -104,7 +110,8 @@ const MainPage = () => {
                 params.network_code === " ") ||
             (params.station_code === "" && // PARAMS RESETEADOS
                 params.country_code === "" &&
-                params.network_code === "")
+                params.network_code === "" &&
+                !spinner)
         ) {
             setStations(initialStations);
         }
@@ -118,6 +125,20 @@ const MainPage = () => {
             getStations();
         }
     }, [params]);
+
+    useEffect(() => {
+        if (stationsUpdated) {
+            if (
+                params.station_code === "" && // PARAMS RESETEADOS
+                params.country_code === "" &&
+                params.network_code === ""
+            ) {
+                setStations(initialStations);
+            }
+
+            setStationsUpdated(false); // Resetear el estado
+        }
+    }, [stationsUpdated]);
 
     useEffect(() => {
         if (!initialStations) {

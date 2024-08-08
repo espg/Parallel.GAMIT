@@ -224,6 +224,7 @@ const People = () => {
                                         title: "",
                                         type: "edit",
                                     });
+                                    setMsg(undefined);
                                     getAll();
                                 }}
                             />

@@ -62,7 +62,8 @@ const MapStation = ({ station }: MapProps) => {
         }));
     }, [station]);
 
-    const iconGaps = station?.has_gaps ? alertIcon : okIcon;
+    const iconGaps =
+        station?.has_gaps || !station?.has_stationinfo ? alertIcon : okIcon;
 
     return (
         <div className=" z-10 pt-6 w-6/12 flex justify-center">

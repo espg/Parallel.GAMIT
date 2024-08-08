@@ -381,13 +381,14 @@ const MonumentModal = ({
                     msg={msg}
                     loading={loading}
                     confirmRemove={() => delMonument()}
-                    closeModal={() =>
+                    closeModal={() => {
                         setModals({
                             show: false,
                             title: "",
                             type: "edit",
-                        })
-                    }
+                        });
+                        setMsg(undefined);
+                    }}
                 />
             )}
         </Modal>

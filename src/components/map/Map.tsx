@@ -63,10 +63,10 @@ const MapMarkers = ({
         setMarkersByBounds(
             stations?.filter(
                 (s) =>
-                    s.lat < mapEastCorner.lat &&
-                    s.lon < mapEastCorner.lng &&
-                    s.lat > mapWestCorner.lat &&
-                    s.lon > mapWestCorner.lng,
+                    s?.lat < mapEastCorner?.lat &&
+                    s?.lon < mapEastCorner?.lng &&
+                    s?.lat > mapWestCorner?.lat &&
+                    s?.lon > mapWestCorner?.lng,
             ),
         );
     });
@@ -98,14 +98,14 @@ const MapMarkers = ({
             let lat, lng;
 
             if (initialCenter instanceof LatLng) {
-                lat = initialCenter.lat;
-                lng = initialCenter.lng;
+                lat = initialCenter?.lat;
+                lng = initialCenter?.lng;
             } else if (Array.isArray(initialCenter)) {
                 lat = initialCenter[0];
                 lng = initialCenter[1];
             } else {
-                lat = initialCenter.lat;
-                lng = initialCenter.lng;
+                lat = initialCenter?.lat;
+                lng = initialCenter?.lng;
             }
 
             map.setView([lat + 1, lng + 1], 4);
@@ -116,12 +116,13 @@ const MapMarkers = ({
         <>
             {markersByBounds &&
                 markersByBounds?.map((s) => {
-                    const iconGaps = s.has_gaps ? alertIcon : okIcon;
+                    const iconGaps =
+                        s.has_gaps || !s.has_stationinfo ? alertIcon : okIcon;
                     const pos: LatLngExpression = [s?.lat ?? 0, s?.lon ?? 0];
                     return (
                         <Marker
                             icon={iconGaps}
-                            key={s.lat + s.lon + (s?.api_id ?? 0)}
+                            key={s?.lat + s?.lon + (s?.api_id ?? 0)}
                             position={pos}
                         >
                             {" "}

@@ -432,13 +432,14 @@ const StationPeopleModal = ({
                     msg={msg}
                     loading={loading}
                     confirmRemove={() => delPerson()}
-                    closeModal={() =>
+                    closeModal={() => {
+                        setMsg(undefined);
                         setModals({
                             show: false,
                             title: "",
                             type: "edit",
-                        })
-                    }
+                        });
+                    }}
                 />
             )}
         </Modal>

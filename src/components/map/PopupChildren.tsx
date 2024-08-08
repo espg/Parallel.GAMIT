@@ -3,10 +3,16 @@ import { Link } from "react-router-dom";
 
 import useApi from "@hooks/useApi";
 import { useAuth } from "@hooks/useAuth";
-import { getRinexService } from "@services";
+import { getRinexService, getStationMetaService } from "@services";
 
-import { RinexData, RinexServiceData, StationData } from "@types";
-import { formattedDates } from "@utils/index";
+import {
+    RinexData,
+    RinexServiceData,
+    StationData,
+    StationMetadataServiceData,
+} from "@types";
+
+import { formattedDates } from "@utils";
 
 interface PopupChildrenProps {
     station: StationData | undefined;
@@ -31,9 +37,9 @@ const PopupChildren = ({ station, fromMain }: PopupChildrenProps) => {
         Station: station_code,
         Network: network_code,
         Country: country_code,
-        Latitude: lat,
-        Longitude: lon,
-        Height: height,
+        Latitude: lat?.toFixed(8),
+        Longitude: lon?.toFixed(8),
+        Height: height?.toFixed(3),
     };
 
     const { token, logout } = useAuth();
@@ -45,6 +51,10 @@ const PopupChildren = ({ station, fromMain }: PopupChildrenProps) => {
     const [lastRinex, setLastRinex] = useState<RinexData | undefined>(
         undefined,
     );
+
+    const [stationMeta, setStationMeta] = useState<
+        StationMetadataServiceData | undefined
+    >(undefined);
 
     const [loading, setLoading] = useState(false);
 
@@ -73,18 +83,38 @@ const PopupChildren = ({ station, fromMain }: PopupChildrenProps) => {
         }
     };
 
+    const getStationMeta = async () => {
+        try {
+            const res = await getStationMetaService<StationMetadataServiceData>(
+                api,
+                Number(station?.api_id),
+            );
+            if (res) {
+                setStationMeta(res);
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
     useEffect(() => {
         if (fromMain) {
             getRinex();
         }
     }, [fromMain]);
 
+    useEffect(() => {
+        getStationMeta();
+    }, []);
+
     return (
         <div
             className={`flex flex-col self-start space-y-2 ${fromMain ? "md:w-[400px] lg:w-[450px]" : "w-[200px]"} `}
         >
-            <span className="w-full bg-green-400 px-4 text-center font-bold self-center">
-                STATUS
+            <span className="w-full bg-green-400 px-4 py-1 text-center font-bold self-center">
+                {stationMeta?.station_type_name
+                    ? stationMeta?.station_type_name.toUpperCase()
+                    : "Station type not defined"}
             </span>
             <div className="flex justify-between w-full divide-x-2">
                 <div className="flex flex-col grow justify-center space-y-2">
@@ -122,7 +152,7 @@ const PopupChildren = ({ station, fromMain }: PopupChildrenProps) => {
                                         {" "}
                                         {formattedDates(
                                             new Date(
-                                                firstRinex.observation_e_time,
+                                                firstRinex.observation_s_time,
                                             ),
                                         )}
                                     </span>
@@ -153,7 +183,7 @@ const PopupChildren = ({ station, fromMain }: PopupChildrenProps) => {
                                     <span className="ml-1">
                                         {formattedDates(
                                             new Date(
-                                                lastRinex.observation_e_time,
+                                                lastRinex.observation_s_time,
                                             ),
                                         )}
                                     </span>

@@ -62,6 +62,7 @@ export interface StationMetadataServiceData {
     station: string;
     station_type: string | null;
     status: string;
+    station_type_name: string | null;
     statusCode: string;
 }
 
@@ -324,6 +325,7 @@ export interface StationData {
     auto_z: number;
     harpos_coeff_otl: string;
     has_gaps: boolean;
+    has_stationinfo: boolean;
     lat: number;
     lon: number;
     height: number;
@@ -335,9 +337,9 @@ export interface StationData {
 
 export interface StationInfoData {
     antenna_code: string;
-    antenna_east: number;
-    antenna_height: number;
-    antenna_north: number;
+    antenna_east: string;
+    antenna_height: string;
+    antenna_north: string;
     antenna_serial: string;
     api_id: number;
     comments: null | string;

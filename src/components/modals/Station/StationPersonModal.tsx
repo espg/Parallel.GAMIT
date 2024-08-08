@@ -90,13 +90,7 @@ const StationPersonModal = ({
 
             const data = {
                 role: String(roles?.find((r) => r.name === formState.role)?.id),
-                person: String(
-                    people?.find(
-                        (p) =>
-                            p.first_name === formState.person.split(" ")[0] &&
-                            p.last_name === formState.person.split(" ")[1],
-                    )?.id,
-                ),
+                person: formState.person,
                 station: String(Station.api_id),
             };
             const res = await postRolePersonStationService<
@@ -212,7 +206,18 @@ const StationPersonModal = ({
 
                         const keysToMenu: string[] = ["person", "role"];
 
-                        console.log(matchingPeople, people);
+                        const person =
+                            key === "person"
+                                ? people?.find(
+                                      (p) =>
+                                          p.id ===
+                                          Number(
+                                              formState[
+                                                  key as keyof typeof formState
+                                              ],
+                                          ),
+                                  )
+                                : null;
 
                         // const optionalFields: string[] = ["photo", "user"];
                         return (
@@ -241,9 +246,13 @@ const StationPersonModal = ({
                                                 type="text"
                                                 name={key}
                                                 value={
-                                                    formState[
-                                                        key as keyof typeof formState
-                                                    ] ?? ""
+                                                    key === "person" && person
+                                                        ? person?.first_name +
+                                                          " " +
+                                                          person?.last_name
+                                                        : formState[
+                                                              key as keyof typeof formState
+                                                          ] ?? ""
                                                 }
                                                 onChange={(e) => {
                                                     handleChange(e.target);
@@ -282,7 +291,9 @@ const StationPersonModal = ({
                                                             " " +
                                                             p.last_name
                                                         }
-                                                        // alterValue={String(p.id)}
+                                                        alterValue={String(
+                                                            p.id,
+                                                        )}
                                                         dispatch={dispatch}
                                                         setShowMenu={
                                                             setShowMenu
@@ -363,13 +374,14 @@ const StationPersonModal = ({
                     msg={msg}
                     loading={loading}
                     confirmRemove={() => delPerson()}
-                    closeModal={() =>
+                    closeModal={() => {
                         setModals({
                             show: false,
                             title: "",
                             type: "edit",
-                        })
-                    }
+                        });
+                        setMsg(undefined);
+                    }}
                 />
             )}
         </Modal>

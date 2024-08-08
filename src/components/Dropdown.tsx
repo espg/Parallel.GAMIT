@@ -55,8 +55,8 @@ const Dropdown = ({
 
     const buttonStyles =
         position === "first"
-            ? "whitespace-nowrap  h-full dark:bg-gray-800 shadow-sm rounded-l-md flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-50 hover:bg-gray-50 dark:hover:bg-gray-500 focus:outline-none"
-            : "whitespace-nowrap  h-full dark:bg-gray-800 shadow-sm flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-50 hover:bg-gray-50 dark:hover:bg-gray-500 focus:outline-none";
+            ? "whitespace-nowrap  h-full bg-gray-800 shadow-sm rounded-l-md flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-gray-700 text-gray-50 hover:bg-gray-50 hover:bg-gray-500 focus:outline-none"
+            : "whitespace-nowrap  h-full bg-gray-800 shadow-sm flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-gray-700 text-gray-50 hover:bg-gray-50 hover:bg-gray-500 focus:outline-none";
 
     return (
         <div className="dropdown dropdown-end">
@@ -109,7 +109,7 @@ const Dropdown = ({
                     text-xl font-normal leading-[1.6] text-surface outline-none  transition
                     duration-200 ease-in-out focus:z-[3] focus:border-primary
                     focus:shadow-inset focus:outline-none motion-reduce:transition-none
-                    dark:autofill:shadow-autofill dark:focus:border-primary  "
+                    autofill:shadow-autofill "
                             placeholder="Search Country"
                             aria-label="country"
                             aria-describedby="addon-wrapping"
@@ -131,9 +131,9 @@ const Dropdown = ({
                                       <a
                                           key={code.id}
                                           className="flex items-center 
-                                          justify-around py-2 text-gray-700 hover:bg-gray-100 
-                                          hover:rounded-md hover:text-gray-900 dark:text-gray-100 
-                                          dark:hover:text-white dark:hover:bg-gray-600 cursor-pointer"
+                                          justify-around py-2  
+                                          hover:rounded-md  text-gray-100 
+                                          hover:text-white hover:bg-gray-600 cursor-pointer"
                                           role="menuitem"
                                           onClick={() => {
                                               setDataSelected(
@@ -164,9 +164,9 @@ const Dropdown = ({
                                       <a
                                           key={code.id + "index" + index}
                                           className="flex items-center justify-around 
-                                          py-2 text-gray-700 hover:bg-gray-100 hover:rounded-md 
-                                          hover:text-gray-900 dark:text-gray-100 dark:hover:text-white
-                                           dark:hover:bg-gray-600 cursor-pointer"
+                                          py-2  hover:rounded-md 
+                                           text-gray-100 hover:text-white
+                                           hover:bg-gray-600 cursor-pointer"
                                           role="menuitem"
                                           onClick={() => {
                                               setDataSelected(
@@ -212,7 +212,7 @@ const Dropdown = ({
                     text-xl font-normal leading-[1.6] text-surface outline-none  transition
                     duration-200 ease-in-out focus:z-[3] focus:border-primary
                     focus:shadow-inset focus:outline-none motion-reduce:transition-none
-                    dark:autofill:shadow-autofill dark:focus:border-primary  "
+                    autofill:shadow-autofill "
                                 placeholder="Search Network Code"
                                 aria-label="Network Code"
                                 aria-describedby="addon-wrapping"
@@ -248,9 +248,9 @@ const Dropdown = ({
                                           <a
                                               key={n?.api_id}
                                               className="flex items-center justify-center py-2
-                                         text-gray-700 hover:bg-gray-100 hover:rounded-md 
-                                         hover:text-gray-900 dark:text-gray-100 dark:hover:text-white
-                                          dark:hover:bg-gray-600 cursor-pointer"
+                                          hover:rounded-md 
+                                          text-gray-100 hover:text-white
+                                          hover:bg-gray-600 cursor-pointer"
                                               role="menuitem"
                                               onClick={() => {
                                                   setDataSelected(
@@ -287,9 +287,9 @@ const Dropdown = ({
                                           <a
                                               key={n?.api_id}
                                               className="flex items-center justify-center py-2
-                                         text-gray-700 hover:bg-gray-100 hover:rounded-md 
-                                         hover:text-gray-900 dark:text-gray-100 dark:hover:text-white
-                                          dark:hover:bg-gray-600 cursor-pointer"
+                                          hover:rounded-md 
+                                          text-gray-100 hover:text-white
+                                          hover:bg-gray-600 cursor-pointer"
                                               role="menuitem"
                                               onClick={() => {
                                                   setDataSelected(

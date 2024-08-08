@@ -309,7 +309,7 @@ const StationMetadataModal = ({
 
                 const resMeta = await patchStationMetaService<
                     StationMetadataServiceData | ErrorResponse
-                >(api, Number(stationMeta?.id), meta);
+                >(api, Number(stationMeta?.station), meta);
                 if ("msg" in resMeta) {
                     setMetaMsg({
                         status: resMeta.statusCode,

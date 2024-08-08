@@ -112,6 +112,10 @@ const EditStatsModal = ({
 
     useEffect(() => {
         if (stationInfo && modalType === "edit") {
+            stationInfo.antenna_east = stationInfo.antenna_east.toString();
+            stationInfo.antenna_north = stationInfo.antenna_north.toString();
+            stationInfo.antenna_height = stationInfo.antenna_height.toString();
+
             dispatch({
                 type: "set",
                 payload: stationInfo,
@@ -136,13 +140,7 @@ const EditStatsModal = ({
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { value, name } = e.target;
-        dispatch({
-            type: "change_value",
-            payload: {
-                inputName: name,
-                inputValue: value,
-            },
-        });
+
         if (name === "receiver_code") {
             const match = receivers.filter((receiver) =>
                 receiver.receiver_code.toLowerCase().includes(value),
@@ -162,6 +160,14 @@ const EditStatsModal = ({
             );
             setMatchingHeightcodes(match);
         }
+
+        dispatch({
+            type: "change_value",
+            payload: {
+                inputName: name,
+                inputValue: value,
+            },
+        });
     };
 
     const getReceivers = async () => {
@@ -236,7 +242,9 @@ const EditStatsModal = ({
             setLoading(true);
 
             formState.date_end =
-                formState.date_end.trim() === "" ? null : formState.date_end;
+                formState.date_end?.trim() === "" || !formState.date_end
+                    ? null
+                    : formState.date_end;
 
             const res = await putStationInfoService<
                 ExtendedStationInfoData | ErrorResponse

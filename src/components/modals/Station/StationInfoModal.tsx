@@ -65,11 +65,13 @@ const StationInfoModal = ({
         },
     );
 
+    const REGISTERS_PER_PAGE = 15; // Es el mismo que params.limit
+
     const bParams: GetParams = useMemo(() => {
         return {
             network_code: station?.network_code,
             station_code: station?.station_code,
-            limit: 5,
+            limit: REGISTERS_PER_PAGE,
             offset: 0,
         };
     }, [station]);
@@ -85,7 +87,6 @@ const StationInfoModal = ({
     const [activePage, setActivePage] = useState<number>(1);
     const [pages, setPages] = useState<number>(0);
     const PAGES_TO_SHOW = 2;
-    const REGISTERS_PER_PAGE = 5; // Es el mismo que params.limit
 
     const getStationInfo = async () => {
         try {

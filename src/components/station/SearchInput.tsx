@@ -240,8 +240,8 @@ const SearchInput = ({ stations, params, setParams }: SearchInputProps) => {
                     text-2xl font-normal leading-[1.6] text-surface outline-none transition 
                     duration-200 ease-in-out focus:z-[3] focus:border-primary 
                     focus:shadow-inset focus:outline-none motion-reduce:transition-none  
-                    dark:autofill:shadow-autofill dark:focus:border-primary disabled:bg-gray-200 
-                    disabled:cursor-not-allowed disabled:text-gray-500 disabled:dark:text"
+                    autofill:shadow-autofill disabled:bg-gray-200 
+                    disabled:cursor-not-allowed disabled:text-gray-500 disabled:text"
                         placeholder="Search for station code"
                         aria-label="station"
                         // disabled={!networkSelected || !codeSelected}
@@ -268,7 +268,7 @@ const SearchInput = ({ stations, params, setParams }: SearchInputProps) => {
                 <button
                     className="flex justify-center items-center hover:bg-gray-100 rounded-r-md w-2/12 px-2
                     disabled:bg-gray-200 
-                    disabled:cursor-not-allowed disabled:text-gray-500 disabled:dark:text
+                    disabled:cursor-not-allowed disabled:text-gray-500 disabled:text
                     "
                     type="submit"
                     // disabled={!networkSelected || !codeSelected}

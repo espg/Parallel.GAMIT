@@ -292,13 +292,14 @@ const StationRoleModal = ({
                     msg={msg}
                     loading={loading}
                     confirmRemove={() => delRole()}
-                    closeModal={() =>
+                    closeModal={() => {
                         setModals({
                             show: false,
                             title: "",
                             type: "edit",
-                        })
-                    }
+                        });
+                        setMsg(undefined);
+                    }}
                 />
             )}
         </Modal>
