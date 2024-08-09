@@ -55,8 +55,8 @@ const Dropdown = ({
 
     const buttonStyles =
         position === "first"
-            ? "whitespace-nowrap  h-full bg-gray-800 shadow-sm rounded-l-md flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-gray-700 text-gray-50 hover:bg-gray-50 hover:bg-gray-500 focus:outline-none"
-            : "whitespace-nowrap  h-full bg-gray-800 shadow-sm flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-gray-700 text-gray-50 hover:bg-gray-50 hover:bg-gray-500 focus:outline-none";
+            ? "whitespace-nowrap  h-full bg-gray-800 shadow-sm rounded-l-md flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-white hover:bg-gray-50 hover:bg-gray-500 focus:outline-none"
+            : "whitespace-nowrap  h-full bg-gray-800 shadow-sm flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-white hover:bg-gray-50 hover:bg-gray-500 focus:outline-none";
 
     return (
         <div className="dropdown dropdown-end">

@@ -7,6 +7,7 @@ import {
     MenuButton,
     MenuContent,
     Modal,
+    StationFilesModal,
 } from "@componentsReact";
 
 import useApi from "@hooks/useApi";
@@ -14,6 +15,7 @@ import { useAuth } from "@hooks/useAuth";
 import UseFormReducer from "@hooks/useFormReducer";
 
 import {
+    ArchiveBoxIcon,
     ClipboardDocumentIcon,
     PencilSquareIcon,
 } from "@heroicons/react/24/outline";
@@ -29,7 +31,7 @@ import {
     patchStationService,
 } from "@services";
 
-import { decimalToDMS, formattedDates } from "@utils";
+import { decimalToDMS, formattedDates, showModal } from "@utils";
 
 import {
     ErrorResponse,
@@ -108,6 +110,11 @@ const StationMetadataModal = ({
     const [stationInfo, setStationInfo] = useState<StationInfoData | undefined>(
         undefined,
     );
+
+    const [modals, setModals] = useState<
+        | { show: boolean; title: string; type: "add" | "edit" | "none" }
+        | undefined
+    >(undefined);
 
     const getTypes = async () => {
         try {
@@ -385,6 +392,10 @@ const StationMetadataModal = ({
         "Radome Code",
     ];
 
+    useEffect(() => {
+        modals?.show && showModal(modals.title);
+    }, [modals]);
+
     return (
         <Modal
             close={close}
@@ -396,6 +407,18 @@ const StationMetadataModal = ({
                 <h3 className="font-bold text-center text-3xl my-2 grow">
                     Metadata
                 </h3>
+                <button
+                    className="flex items-center btn btn-ghost btn-circle"
+                    onClick={() =>
+                        setModals({
+                            show: true,
+                            title: "StationFiles",
+                            type: "edit",
+                        })
+                    }
+                >
+                    <ArchiveBoxIcon title="files" className="size-8" />
+                </button>
                 <button
                     className="flex items-center btn btn-ghost btn-circle"
                     onClick={() => setEdit(!edit)}
@@ -1137,6 +1160,14 @@ const StationMetadataModal = ({
                         UPDATE
                     </button>
                 </div>
+            )}
+            {modals && modals?.title === "StationFiles" && (
+                <StationFilesModal
+                    stationId={stationMeta?.station ?? undefined}
+                    modalType={modals.title}
+                    reFetch={refetch}
+                    setStateModal={setModals}
+                />
             )}
         </Modal>
     );

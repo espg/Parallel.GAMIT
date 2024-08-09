@@ -29,5 +29,5 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 }
 
 input[type="date"] {
-    width: 90%;
+    width: 100%;
 }

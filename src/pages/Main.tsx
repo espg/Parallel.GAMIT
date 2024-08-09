@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { LatLngExpression } from "leaflet";
 import {
     Map,
@@ -47,6 +47,8 @@ const MainPage = () => {
     const [spinner, setSpinner] = useState<boolean>(false);
     const [stationsUpdated, setStationsUpdated] = useState<boolean>(false);
 
+    const abortControllerRef = useRef<AbortController | null>(null);
+
     const getInitialStations = async () => {
         try {
             setLoading(true);
@@ -67,11 +69,21 @@ const MainPage = () => {
     const getStations = async () => {
         setSpinner(true);
 
+        // Cancel the previous request if it exists
+        if (abortControllerRef.current) {
+            abortControllerRef.current.abort();
+        }
+
+        // Create a new AbortController for the new request
+        const abortController = new AbortController();
+        abortControllerRef.current = abortController;
+
         try {
             // if (!params.country_code || !params.network_code) return;
             const result = await getStationsService<StationServiceData>(
                 api,
                 params,
+                { signal: abortController.signal },
             );
             if (result) {
                 setStations(result.data);
@@ -110,9 +122,9 @@ const MainPage = () => {
                 params.network_code === " ") ||
             (params.station_code === "" && // PARAMS RESETEADOS
                 params.country_code === "" &&
-                params.network_code === "" &&
-                !spinner)
+                params.network_code === "")
         ) {
+            abortControllerRef.current?.abort();
             setStations(initialStations);
         }
 

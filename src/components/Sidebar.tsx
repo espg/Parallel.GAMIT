@@ -6,7 +6,6 @@ import { StationInfoModal, StationMetadataModal } from "@componentsReact";
 import { useAuth } from "@hooks/useAuth";
 
 import {
-    ArchiveBoxIcon,
     CodeBracketIcon,
     InformationCircleIcon,
     PaperAirplaneIcon,
@@ -47,12 +46,11 @@ const Sidebar = ({
     const icons: Icons = {
         Information: InformationCircleIcon,
         Metadata: CodeBracketIcon,
-        Files: ArchiveBoxIcon,
         Visits: PaperAirplaneIcon,
         People: UsersIcon,
     };
 
-    const longTitles = ["Information", "Metadata", "Files", "Visits", "People"];
+    const longTitles = ["Information", "Metadata", "Visits", "People"];
 
     // const admTitles = ["Admin", "Users", "Settings"];
     const sidebarWidth = show ? "w-72" : "w-32";
@@ -65,8 +63,6 @@ const Sidebar = ({
     useEffect(() => {
         modals?.show && showModal(modals.title);
     }, [modals]);
-
-    //TODO: HACER EL MODAL DE LOS FILES
 
     return (
         <>

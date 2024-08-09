@@ -359,11 +359,13 @@ export async function delStationInfoService<T>(
 export async function getStationsService<T>(
     api: AxiosInstance,
     params?: GetParams,
+    options?: { signal?: AbortSignal },
 ): Promise<T> {
     try {
         const paramsArr = params ? transformParams(params) : "";
         const response = await api.get(
             `api/stations${paramsArr.length > 0 ? `?${paramsArr}` : ""}`,
+            { signal: options?.signal },
         );
         return response.data as Promise<T>;
     } catch (error) {

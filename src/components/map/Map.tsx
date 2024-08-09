@@ -154,7 +154,10 @@ const Map = ({ stations, initialCenter }: MapProps) => {
         const pos: LatLngExpression = initialCenter
             ? initialCenter
             : stations && stations.length > 0
-              ? [stations[0]?.lat, stations[0]?.lon]
+              ? ([
+                    stations.find((s) => s.lat && s.lon)?.lat,
+                    stations.find((s) => s.lat && s.lon)?.lon,
+                ] as LatLngExpression)
               : [0, 0];
 
         setMapProps((prevProps) => ({

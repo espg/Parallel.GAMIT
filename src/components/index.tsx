@@ -76,8 +76,6 @@ export { default as ConfirmDeleteModal } from "./modals/ConfirmDeleteModal";
 
 export { default as RoleModal } from "./modals/Users/RoleModal";
 
-export { default as StatsModal } from "./modals/Station/StatsModal";
-
 export { default as UsersModal } from "./modals/Users/UsersModal";
 
 export { default as MonumentModal } from "./modals/Overview/MonumentModal";
@@ -91,6 +89,10 @@ export { default as StationTypesModal } from "./modals/Overview/StationTypesModa
 export { default as StationStatusModal } from "./modals/Overview/StationStatusModal";
 
 export { default as StationsModal } from "./modals/StationsModal";
+
+export { default as StatsModal } from "./modals/Station/StatsModal";
+
+export { default as StationFilesModal } from "./modals/Station/StationFilesModal";
 
 export { default as StationInfoModal } from "./modals/Station/StationInfoModal";
 
