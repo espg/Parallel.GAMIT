@@ -1299,7 +1299,6 @@ const StationVisitDetailModal = ({
                               : delCampaign()
                     }
                     closeModal={() => {
-                        handleCloseModal();
                         setModals({
                             show: false,
                             title: "",
