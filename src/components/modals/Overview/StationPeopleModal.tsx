@@ -10,6 +10,7 @@ import {
 
 import {
     delPeopleService,
+    getUsersService,
     patchPeopleService,
     postPeopleService,
 } from "@services";
@@ -26,11 +27,11 @@ import {
     People,
     ExtendedPeople,
     UsersData,
+    UsersServiceData,
 } from "@types";
 
 interface Props {
     Person: People | undefined;
-    users: UsersData[] | undefined;
     modalType: string;
     reFetch: () => void;
     setStateModal: React.Dispatch<
@@ -44,7 +45,6 @@ interface Props {
 
 const StationPeopleModal = ({
     Person,
-    users,
     modalType,
     reFetch,
     setStateModal,
@@ -61,6 +61,8 @@ const StationPeopleModal = ({
     const [msg, setMsg] = useState<
         { status: number; msg: string; errors?: Errors } | undefined
     >(undefined);
+
+    const [users, setUsers] = useState<UsersData[]>([]);
 
     const [modals, setModals] = useState<
         | { show: boolean; title: string; type: "add" | "edit" | "none" }
@@ -84,11 +86,24 @@ const StationPeopleModal = ({
         user: "",
     });
 
+    const getUsers = async () => {
+        try {
+            const res = await getUsersService<UsersServiceData>(api);
+            setUsers(res.data);
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
     useEffect(() => {
         if (Person) {
+            const { user_name, ...rest } = Person;
+
+            rest.user = user_name;
+
             dispatch({
                 type: "set",
-                payload: Person,
+                payload: rest,
             });
         }
     }, [Person]); // eslint-disable-line
@@ -97,7 +112,7 @@ const StationPeopleModal = ({
         try {
             setLoading(true);
 
-            const { id, photo_actual_file, ...data } = formState; // eslint-disable-line
+            const { id, photo_actual_file, user, ...data } = formState; // eslint-disable-line
 
             const formData = new FormData();
 
@@ -107,6 +122,12 @@ const StationPeopleModal = ({
 
             if (photo_actual_file) {
                 formData.append("photo", photo_actual_file);
+            }
+
+            const userById = users?.find((u) => u.username === user);
+
+            if (userById) {
+                formData.append("user", String(userById.id));
             }
 
             const res = await postPeopleService<ExtendedPeople | ErrorResponse>(
@@ -136,7 +157,7 @@ const StationPeopleModal = ({
         try {
             setLoading(true);
 
-            const { id, photo_actual_file, ...data } = formState; // eslint-disable-line
+            const { id, user, photo_actual_file, ...data } = formState; // eslint-disable-line
 
             const formData = new FormData();
 
@@ -148,13 +169,19 @@ const StationPeopleModal = ({
                 formData.append("photo", photo_actual_file);
             }
 
+            const userById = users?.find((u) => u.username === user);
+
+            if (userById) {
+                formData.append("user", String(userById.id));
+            }
+
             if (!checks?.photo) {
                 formData.delete("photo");
             }
 
             const res = await patchPeopleService<
                 ExtendedPeople | ErrorResponse
-            >(api, Number(Person?.id), data);
+            >(api, Number(Person?.id), formData);
             if ("status" in res) {
                 setMsg({
                     status: res.statusCode,
@@ -219,7 +246,7 @@ const StationPeopleModal = ({
 
         if (name === "user") {
             const match = users?.filter((u) =>
-                u.username.toLowerCase().includes(value),
+                u.username.toLowerCase().includes(value.toLowerCase()),
             );
             setMatchingUsers(match);
         }
@@ -237,6 +264,10 @@ const StationPeopleModal = ({
     useEffect(() => {
         modals?.show && showModal(modals.title);
     }, [modals]);
+
+    useEffect(() => {
+        getUsers();
+    }, []);
 
     return (
         <Modal
@@ -433,7 +464,6 @@ const StationPeopleModal = ({
                     loading={loading}
                     confirmRemove={() => delPerson()}
                     closeModal={() => {
-                        setMsg(undefined);
                         setModals({
                             show: false,
                             title: "",

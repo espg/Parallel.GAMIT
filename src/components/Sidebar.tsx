@@ -19,6 +19,7 @@ interface SidebarProps {
     show: boolean;
     station: StationData | undefined;
     stationMeta?: StationMetadataServiceData | undefined;
+    refetchStationMeta?: () => void;
     refetch?: () => void;
     setShow: React.Dispatch<React.SetStateAction<boolean>>;
 }
@@ -31,6 +32,7 @@ const Sidebar = ({
     show,
     station,
     stationMeta,
+    refetchStationMeta,
     refetch,
     setShow,
 }: SidebarProps) => {
@@ -69,7 +71,8 @@ const Sidebar = ({
             {
                 /*userRole === "1" && AGREGAR SI VAMOS A HANDLEAR X ROLE */ station && (
                     <div
-                        className="left-0 top-0 min-h-full pt-[8vh] bg-gray-800"
+                        className="left-0 top-0 pt-[8vh] bg-gray-800"
+                        style={{ minHeight: `calc(100vh - 8vh)` }}
                         onMouseEnter={() => setShow(true)}
                         onMouseLeave={() => setShow(false)}
                     >
@@ -108,11 +111,16 @@ const Sidebar = ({
                                                                 ? navigate(
                                                                       `/${station.network_code}/${station.station_code}/people`,
                                                                   )
-                                                                : setModals({
-                                                                      show: true,
-                                                                      title: title,
-                                                                      type: "none",
-                                                                  });
+                                                                : title ===
+                                                                    "Visits"
+                                                                  ? navigate(
+                                                                        `/${station.network_code}/${station.station_code}/visits`,
+                                                                    )
+                                                                  : setModals({
+                                                                        show: true,
+                                                                        title: title,
+                                                                        type: "none",
+                                                                    });
                                                         }}
                                                     >
                                                         <span className="mx-4 text-lg font-normal">
@@ -143,6 +151,9 @@ const Sidebar = ({
                     station={station}
                     stationMeta={stationMeta}
                     size={"xl"}
+                    refetchStationMeta={
+                        refetchStationMeta ? refetchStationMeta : () => {}
+                    }
                     refetch={refetch ? refetch : () => {}}
                     setModalState={setModals}
                 />

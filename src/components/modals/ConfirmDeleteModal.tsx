@@ -37,7 +37,7 @@ const ConfirmDeleteModal = ({
             size="sm"
             modalId="ConfirmDelete"
             variant={variant ? variant : "danger"}
-            handleCloseModal={closeModal}
+            handleCloseModal={() => closeModal()}
         >
             <div className="flex items-center justify-center">
                 <div className="w-3/12">

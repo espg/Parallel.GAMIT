@@ -33,7 +33,20 @@ export async function refreshTokenService<T>(token: string): Promise<T> {
 /*
                SERVICIOS CON AUTENTICACION
 
- <------------------------- AUTH -----------------------------> */
+ <------------------------- AUTH -------------------------------> */
+// SERVER
+
+export async function getServerHealthService<T>(
+    api: AxiosInstance,
+): Promise<T> {
+    try {
+        const response = await api.get(`api/health-check`);
+        return response.data as Promise<T>;
+    } catch (error) {
+        return Promise.reject(error);
+    }
+}
+
 // Users
 export async function getUsersService<T>(
     api: AxiosInstance,
@@ -144,7 +157,6 @@ type RoleData = {
     role_api: boolean;
     allow_all: boolean;
     endpoints_clusters: number[] | [];
-    pages: number[] | [];
 };
 
 export async function postRoleService<T>(
@@ -176,9 +188,13 @@ export async function putRoleService<T>(
 
 export async function getEndpointClustersService<T>(
     api: AxiosInstance,
+    params: GetParams,
 ): Promise<T> {
     try {
-        const response = await api.get(`api/endpoints-clusters`);
+        const paramsArr = params ? transformParams(params) : "";
+        const response = await api.get(
+            `api/endpoints-clusters${paramsArr.length > 0 ? `?${paramsArr}` : ""}`,
+        );
         return response.data as Promise<T>;
     } catch (error) {
         return Promise.reject(error);
@@ -440,7 +456,419 @@ export async function patchStationMetaService<T>(
     data: any,
 ): Promise<T> {
     try {
-        const response = await api.patch(`api/station-meta/${id}`, data);
+        const response = await api.patch(`api/station-meta/${id}`, data, {
+            headers: {
+                "Content-Type": "multipart/form-data",
+            },
+        });
+        return response.data as Promise<T>;
+    } catch (error) {
+        return Promise.reject(error);
+    }
+}
+
+export async function getStationsFilesAttachedService<T>(
+    api: AxiosInstance,
+    params?: GetParams,
+): Promise<T> {
+    try {
+        const paramsArr = params ? transformParams(params) : "";
+        const response = await api.get(
+            `api/station-attached-files${paramsArr.length > 0 ? `?${paramsArr}` : ""}`,
+        );
+        return response.data as Promise<T>;
+    } catch (error) {
+        return Promise.reject(error);
+    }
+}
+
+export async function getStationImagesService<T>(
+    api: AxiosInstance,
+    params?: GetParams,
+): Promise<T> {
+    try {
+        const paramsArr = params ? transformParams(params) : "";
+        const response = await api.get(
+            `api/station-images${paramsArr.length > 0 ? `?${paramsArr}` : ""}`,
+        );
+        return response.data as Promise<T>;
+    } catch (error) {
+        return Promise.reject(error);
+    }
+}
+
+export async function postStationsImagesService<T>(
+    api: AxiosInstance,
+    data: FormData,
+): Promise<T> {
+    try {
+        const response = await api.post(`api/station-images`, data, {
+            headers: {
+                "Content-Type": "multipart/form-data",
+            },
+        });
+        return response.data as Promise<T>;
+    } catch (error) {
+        return Promise.reject(error);
+    }
+}
+
+export async function delStationsImagesService<T>(
+    api: AxiosInstance,
+    id: number,
+): Promise<T> {
+    try {
+        const response = await api.delete(`api/station-images/${id}`);
+        return response.data as Promise<T>;
+    } catch (error) {
+        return Promise.reject(error);
+    }
+}
+
+export async function postStationsFilesAttachedService<T>(
+    api: AxiosInstance,
+    data: FormData,
+): Promise<T> {
+    try {
+        const response = await api.post(`api/station-attached-files`, data, {
+            headers: {
+                "Content-Type": "multipart/form-data",
+            },
+        });
+        return response.data as Promise<T>;
+    } catch (error) {
+        return Promise.reject(error);
+    }
+}
+
+export async function delStationsFilesAttachedService<T>(
+    api: AxiosInstance,
+    id: number,
+): Promise<T> {
+    try {
+        const response = await api.delete(`api/station-attached-files/${id}`);
+        return response.data as Promise<T>;
+    } catch (error) {
+        return Promise.reject(error);
+    }
+}
+
+export async function getStationCampaignsService<T>(
+    api: AxiosInstance,
+    params?: GetParams,
+): Promise<T> {
+    try {
+        const paramsArr = params ? transformParams(params) : "";
+        const response = await api.get(
+            `api/campaigns${paramsArr.length > 0 ? `?${paramsArr}` : ""}`,
+        );
+        return response.data as Promise<T>;
+    } catch (error) {
+        return Promise.reject(error);
+    }
+}
+
+export async function getStationCampaignByIdService<T>(
+    api: AxiosInstance,
+    id: number,
+): Promise<T> {
+    try {
+        const response = await api.get(`api/campaigns/${id}`);
+        return response.data as Promise<T>;
+    } catch (error) {
+        return Promise.reject(error);
+    }
+}
+
+export async function postStationCampaignService<T>(
+    api: AxiosInstance,
+    data: any,
+): Promise<T> {
+    try {
+        const response = await api.post(`api/campaigns`, data);
+        return response.data as Promise<T>;
+    } catch (error) {
+        return Promise.reject(error);
+    }
+}
+
+export async function patchStationCampaignService<T>(
+    api: AxiosInstance,
+    id: number,
+    data: any,
+): Promise<T> {
+    try {
+        const response = await api.put(`api/campaigns/${id}`, data);
+        return response.data as Promise<T>;
+    } catch (error) {
+        return Promise.reject(error);
+    }
+}
+
+export async function delStationCampaignService<T>(
+    api: AxiosInstance,
+    id: number,
+): Promise<T> {
+    try {
+        const response = await api.delete(`api/campaigns/${id}`);
+        return response.data as Promise<T>;
+    } catch (error) {
+        return Promise.reject(error);
+    }
+}
+
+export async function getStationVisitsService<T>(
+    api: AxiosInstance,
+    params: GetParams,
+): Promise<T> {
+    try {
+        const paramsArr = params ? transformParams(params) : "";
+        const response = await api.get(
+            `api/visits${paramsArr.length > 0 ? `?${paramsArr}` : ""}`,
+        );
+        return response.data as Promise<T>;
+    } catch (error) {
+        return Promise.reject(error);
+    }
+}
+
+export async function getStationVisitsByIdService<T>(
+    api: AxiosInstance,
+    id: number,
+): Promise<T> {
+    try {
+        const response = await api.get(`api/visits/${id}`);
+        return response.data as Promise<T>;
+    } catch (error) {
+        return Promise.reject(error);
+    }
+}
+
+export async function postStationVisitService<T>(
+    api: AxiosInstance,
+    data: FormData,
+): Promise<T> {
+    try {
+        const response = await api.post(`api/visits`, data, {
+            headers: {
+                "Content-Type": "multipart/form-data",
+            },
+        });
+        return response.data as Promise<T>;
+    } catch (error) {
+        return Promise.reject(error);
+    }
+}
+
+export async function patchStationVisitService<T>(
+    api: AxiosInstance,
+    id: number,
+    data: FormData,
+): Promise<T> {
+    try {
+        const response = await api.put(`api/visits/${id}`, data, {
+            headers: {
+                "Content-Type": "multipart/form-data",
+            },
+        });
+        return response.data as Promise<T>;
+    } catch (error) {
+        return Promise.reject(error);
+    }
+}
+
+export async function postStationVisitsService<T>(
+    api: AxiosInstance,
+    data: FormData,
+): Promise<T> {
+    try {
+        // {
+        //     "date": "2024-08-20",
+        //     "log_sheet_file": "string",
+        //     "log_sheet_filename": "string",
+        //     "navigation_file": "string",
+        //     "navigation_filename": "string",
+        //     "campaign": 0,
+        //     "station": 0,
+        //     "people": [
+        //       0
+        //     ]
+        //   }
+
+        const response = await api.post(`api/visits`, data, {
+            headers: {
+                "Content-Type": "multipart/form-data",
+            },
+        });
+        return response.data as Promise<T>;
+    } catch (error) {
+        return Promise.reject(error);
+    }
+}
+
+export async function delStationVisitService<T>(
+    api: AxiosInstance,
+    id: number,
+): Promise<T> {
+    try {
+        const response = await api.delete(`api/visits/${id}`);
+        return response.data as Promise<T>;
+    } catch (error) {
+        return Promise.reject(error);
+    }
+}
+
+export async function getStationVisitsImagesService<T>(
+    api: AxiosInstance,
+    params: GetParams,
+): Promise<T> {
+    try {
+        const paramsArr = params ? transformParams(params) : "";
+        const response = await api.get(
+            `api/visit-images${paramsArr.length > 0 ? `?${paramsArr}` : ""}`,
+        );
+        return response.data as Promise<T>;
+    } catch (error) {
+        return Promise.reject(error);
+    }
+}
+
+export async function getStationVisitsImagesByIdService<T>(
+    api: AxiosInstance,
+    id: number,
+): Promise<T> {
+    try {
+        const response = await api.get(`api/visits-images/${id}`);
+        return response.data as Promise<T>;
+    } catch (error) {
+        return Promise.reject(error);
+    }
+}
+
+export async function postStationVisitsImagesService<T>(
+    api: AxiosInstance,
+    data: FormData,
+): Promise<T> {
+    try {
+        const response = await api.post(`api/visit-images`, data, {
+            headers: {
+                "Content-Type": "multipart/form-data",
+            },
+        });
+        return response.data as Promise<T>;
+    } catch (error) {
+        return Promise.reject(error);
+    }
+}
+
+export async function delStationVisitsImagesService<T>(
+    api: AxiosInstance,
+    id: number,
+): Promise<T> {
+    try {
+        const response = await api.delete(`api/visit-images/${id}`);
+        return response.data as Promise<T>;
+    } catch (error) {
+        return Promise.reject(error);
+    }
+}
+
+export async function getStationVisitGnssFilesService<T>(
+    api: AxiosInstance,
+    params: GetParams,
+): Promise<T> {
+    try {
+        const paramsArr = params ? transformParams(params) : "";
+
+        const response = await api.get(
+            `api/visit-gnss-data-files${paramsArr.length > 0 ? `?${paramsArr}` : ""}`,
+        );
+        return response.data as Promise<T>;
+    } catch (error) {
+        return Promise.reject(error);
+    }
+}
+
+export async function postStationVisitGnssFilesService<T>(
+    api: AxiosInstance,
+    data: FormData,
+): Promise<T> {
+    try {
+        // {
+        //     "file": "string",
+        //     "filename": "string",
+        //     "description": "string",
+        //     "visit": 0
+        //   }
+
+        const response = await api.post(`api/visit-gnss-data-files`, data, {
+            headers: {
+                "Content-Type": "multipart/form-data",
+            },
+        });
+        return response.data as Promise<T>;
+    } catch (error) {
+        return Promise.reject(error);
+    }
+}
+
+export async function delStationVisitGnssFilesService<T>(
+    api: AxiosInstance,
+    id: number,
+): Promise<T> {
+    try {
+        const response = await api.delete(`api/visit-gnss-data-files/${id}`);
+        return response.data as Promise<T>;
+    } catch (error) {
+        return Promise.reject(error);
+    }
+}
+
+export async function getStationVisitFilesService<T>(
+    api: AxiosInstance,
+    params: GetParams,
+): Promise<T> {
+    try {
+        const paramsArr = params ? transformParams(params) : "";
+
+        const response = await api.get(
+            `api/visit-attached-files${paramsArr.length > 0 ? `?${paramsArr}` : ""}`,
+        );
+        return response.data as Promise<T>;
+    } catch (error) {
+        return Promise.reject(error);
+    }
+}
+
+export async function postStationVisitFilesService<T>(
+    api: AxiosInstance,
+    data: FormData,
+): Promise<T> {
+    try {
+        // {
+        //     "file": "string",
+        //     "filename": "string",
+        //     "description": "string",
+        //     "visit": 0
+        //   }
+
+        const response = await api.post(`api/visit-attached-files`, data, {
+            headers: {
+                "Content-Type": "multipart/form-data",
+            },
+        });
+        return response.data as Promise<T>;
+    } catch (error) {
+        return Promise.reject(error);
+    }
+}
+
+export async function delStationVisitFilesService<T>(
+    api: AxiosInstance,
+    id: number,
+): Promise<T> {
+    try {
+        const response = await api.delete(`api/visit-attached-files/${id}`);
         return response.data as Promise<T>;
     } catch (error) {
         return Promise.reject(error);
@@ -745,7 +1173,7 @@ export async function patchStationStatusService<T>(
     data: { name: string },
 ): Promise<T> {
     try {
-        const response = await api.patch(`api/monument-types/${id}`, data);
+        const response = await api.patch(`api/station-status/${id}`, data);
         return response.data as Promise<T>;
     } catch (error) {
         return Promise.reject(error);

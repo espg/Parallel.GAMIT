@@ -52,3 +52,18 @@ export const USERS_STATE: UserState = {
     address: "",
     photo: "",
 };
+
+export const VISIT_STATE = {
+    station: "",
+    date: "",
+    log_sheet_file: "",
+    navigation_file: "",
+    campaign: "",
+    people: "",
+};
+
+export const CAMPAIGN_STATE = {
+    name: "",
+    start_date: "",
+    end_date: "",
+};

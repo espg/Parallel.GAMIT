@@ -1,53 +1,69 @@
+import { Link, useNavigate } from "react-router-dom";
+
 import { Spinner } from "@componentsReact";
 
-import { useNavigate } from "react-router-dom";
-
-import { formattedDates } from "@utils/index";
+import { formattedDates } from "@utils";
 import { findFlagUrlByIso3Code } from "country-flags-svg-v2";
 import { TrashIcon } from "@heroicons/react/24/outline";
+import { StationVisitsData } from "@types";
+import { useState } from "react";
 
 interface TableProps {
     table: string;
-    titles: string[];
-    body: any[][] | undefined;
     loading?: boolean;
     dataOnly?: boolean;
+    buttonRegister?: boolean;
     deleteRegister?: boolean;
-    label?: string;
+    titles: string[];
+    body: any[][] | undefined;
+    alterInfo?: any;
     state?: any;
     setState?: any;
+    onAlterClickFunction?: () => void;
     onClickFunction: () => void;
 }
 
 const Table = ({
-    titles,
-    body,
+    table,
     loading,
     dataOnly,
+    buttonRegister,
     deleteRegister,
-    table,
+    titles,
+    body,
+    alterInfo,
     state,
     onClickFunction,
+    onAlterClickFunction,
     setState,
 }: TableProps) => {
     const navigate = useNavigate();
 
+    const [visibleTooltipIndex, setVisibleTooltipIndex] = useState<
+        number | null
+    >(null);
+
     return (
-        <div className={`overflow-x-auto`}>
+        <div className={visibleTooltipIndex === null ? `overflow-x-auto` : ""}>
             <table className="table table-zebra bg-neutral-content">
                 <thead>
                     <tr>
                         {titles.length > 0 ? (
-                            !dataOnly && !deleteRegister ? (
-                                <th className="text-center text-neutral">
-                                    Modify
-                                </th>
-                            ) : (
-                                dataOnly &&
-                                deleteRegister && (
+                            <>
+                                {!dataOnly && !deleteRegister && (
+                                    <th className="text-center text-neutral">
+                                        Modify
+                                    </th>
+                                )}
+                                {dataOnly && deleteRegister && (
                                     <th className="text-center text-neutral"></th>
-                                )
-                            )
+                                )}
+                                {buttonRegister && (
+                                    <th className="text-center text-neutral">
+                                        Add Visit
+                                    </th>
+                                )}
+                            </>
                         ) : (
                             <th className="text-center text-neutral text-2xl">
                                 There is no information for this {table}
@@ -112,6 +128,23 @@ const Table = ({
                                         </td>
                                     )
                                 )}
+                                {buttonRegister && (
+                                    <td
+                                        key={index + "add_visit"}
+                                        className="text-center"
+                                    >
+                                        <button
+                                            className="btn btn-sm btn-circle btn-ghost"
+                                            onClick={() => {
+                                                onAlterClickFunction &&
+                                                    onAlterClickFunction();
+                                                setState(state?.[index]);
+                                            }}
+                                        >
+                                            Add
+                                        </button>
+                                    </td>
+                                )}
                                 {row.map(
                                     (
                                         val: string | boolean | number,
@@ -142,7 +175,11 @@ const Table = ({
                                         return (
                                             <td
                                                 key={idx}
-                                                title={String(val) ?? ""}
+                                                title={
+                                                    titles[idx] !== "Visit"
+                                                        ? String(val) ?? ""
+                                                        : ""
+                                                }
                                                 className={`text-center 
                                                     ${
                                                         titles[idx] ===
@@ -177,7 +214,8 @@ const Table = ({
                                                     )}
 
                                                 {val !== "" &&
-                                                titles[idx] !== "Photo" ? (
+                                                titles[idx] !== "Photo" &&
+                                                titles[idx] !== "Visit" ? (
                                                     typeof val === "string" ? (
                                                         val?.length > 15 &&
                                                         !isDate ? (
@@ -216,6 +254,96 @@ const Table = ({
                                                                     val
                                                                 }
                                                             />
+                                                        </div>
+                                                    </div>
+                                                ) : val !== "" &&
+                                                  val !== null &&
+                                                  typeof val === "string" &&
+                                                  titles[idx] === "Visit" ? (
+                                                    <div
+                                                        className="relative group"
+                                                        onMouseEnter={() =>
+                                                            setVisibleTooltipIndex(
+                                                                index,
+                                                            )
+                                                        }
+                                                        onMouseLeave={() =>
+                                                            setVisibleTooltipIndex(
+                                                                null,
+                                                            )
+                                                        }
+                                                    >
+                                                        <div>
+                                                            {val?.length > 15 &&
+                                                            !isDate
+                                                                ? val?.substring(
+                                                                      0,
+                                                                      15,
+                                                                  ) + "..."
+                                                                : val}
+                                                        </div>
+
+                                                        <div
+                                                            className={` absolute -translate-x-2/4 left-[50%] top-auto bottom-6 ${
+                                                                visibleTooltipIndex ===
+                                                                index
+                                                                    ? "block"
+                                                                    : "hidden"
+                                                            } bg-gray-800 text-white p-2 rounded 
+                                                            text-pretty whitespace-nowrap w-[200px] z-auto`}
+                                                            onMouseEnter={() =>
+                                                                setVisibleTooltipIndex(
+                                                                    index,
+                                                                )
+                                                            }
+                                                            onMouseLeave={() =>
+                                                                setVisibleTooltipIndex(
+                                                                    null,
+                                                                )
+                                                            }
+                                                        >
+                                                            {alterInfo?.[
+                                                                `${state?.[index].name}/~/${state?.[index].id}`
+                                                            ]?.map(
+                                                                (
+                                                                    v: StationVisitsData,
+                                                                ) => {
+                                                                    const stationNetwork =
+                                                                        v?.station_formatted?.split(
+                                                                            ".",
+                                                                        )[0];
+                                                                    const stationCode =
+                                                                        v?.station_formatted?.split(
+                                                                            ".",
+                                                                        )[1];
+                                                                    return (
+                                                                        <Link
+                                                                            className="text-base block mb-1 even:bg-gray-700 rounded last:mb-0"
+                                                                            key={
+                                                                                v.id
+                                                                            }
+                                                                            to={`/${stationNetwork}/${stationCode}/visits`}
+                                                                            state={{
+                                                                                visitDetail:
+                                                                                    v,
+                                                                            }}
+                                                                        >
+                                                                            {" " +
+                                                                                "(" +
+                                                                                v.station_formatted +
+                                                                                ")" +
+                                                                                " - " +
+                                                                                v.date}{" "}
+                                                                        </Link>
+                                                                    );
+                                                                },
+                                                            )}
+                                                            <div
+                                                                className="absolute top-[100%] left-2/4 w-0 
+                                                            -translate-x-2/4 h-0 border-l-8 border-l-transparent 
+                                                            border-r-8 border-r-transparent border-t-8
+                                                             border-t-gray-800"
+                                                            ></div>
                                                         </div>
                                                     </div>
                                                 ) : (

@@ -6,6 +6,8 @@ export interface GetParams {
     station_code?: string;
     antenna_code?: string;
     station_api_id?: string;
+    visit_api_id?: string;
+    role_type?: "FRONT" | "API";
     offset: number;
     limit: number;
 }
@@ -25,6 +27,10 @@ export interface ErrorResponse {
     msg: string;
     response: Errors;
     status: string;
+    statusCode: number;
+}
+
+export interface ExtendedErrors extends Errors {
     statusCode: number;
 }
 
@@ -53,6 +59,7 @@ export interface StationMetadataServiceData {
     has_gaps_last_update_datetime: string;
     has_gaps_update_needed: boolean;
     id: string;
+    comments: string;
     monument_type: string;
     navigation_actual_file: string | null;
     navigation_filename: string;
@@ -73,17 +80,45 @@ export interface StationInfoServiceData {
     statusCode: number;
 }
 
-export interface MonumentTypesServiceData {
-    count: number;
-    total_count: number;
-    data: MonumentTypes[];
-    statusCode: number;
-}
-
 export interface StationStatusServiceData {
     count: number;
     total_count: number;
     data: StationStatus[];
+    statusCode: number;
+}
+
+export interface StationFilesServiceData {
+    count: number;
+    total_count: number;
+    data: StationFilesData[];
+    statusCode: number;
+}
+
+export interface StationVisitsServiceData {
+    count: number;
+    total_count: number;
+    data: StationVisitsData[];
+    statusCode: number;
+}
+
+export interface StationCampaignsServiceData {
+    count: number;
+    total_count: number;
+    data: StationCampaignsData[];
+    statusCode: number;
+}
+
+export interface StationVisitsFilesServiceData {
+    count: number;
+    total_count: number;
+    data: StationVisitsFilesData[];
+    statusCode: number;
+}
+
+export interface MonumentTypesServiceData {
+    count: number;
+    total_count: number;
+    data: MonumentTypes[];
     statusCode: number;
 }
 
@@ -164,6 +199,21 @@ export interface RolePersonStationServiceData {
     statusCode: number;
 }
 
+export interface CampaignsServiceData {
+    count: number;
+    total_count: number;
+    data: CampaignsData[];
+    statusCode: number;
+}
+
+export interface CampaignsData {
+    id: number;
+    name: string;
+    start_date: string;
+    end_date: string;
+    statusCode: number;
+}
+
 export interface UsersData {
     address: string;
     email: string;
@@ -230,6 +280,83 @@ export interface StationStatus {
     name: string;
 }
 
+export interface StationFilesData {
+    id: number;
+    station: number;
+    filename: string;
+    actual_file: string;
+    description: string;
+    statusCode: number;
+}
+
+export interface VisitFilesData {
+    id: number;
+    visit: number;
+    filename: string;
+    description: string;
+    statusCode: number;
+}
+
+export interface StationVisitsData {
+    campaign: string | null;
+    campaign_people: string | null;
+    date: string;
+    id: number;
+    log_sheet_actual_file: string | null;
+    log_sheet_filename: string;
+    navigation_actual_file: string | null;
+    navigation_filename: string;
+    people: string[{ id: number; name: string }];
+    station_formatted?: string;
+    station: number;
+}
+
+export interface StationPostVisitData {
+    campaign: string;
+    date: string;
+    id: number;
+    log_sheet_actual_file: string | null;
+    log_sheet_filename: string;
+    navigation_actual_file: string | null;
+    navigation_filename: string;
+    people: number[];
+    station: number;
+    statusCode: number;
+}
+
+export interface StationCampaignsData {
+    id: number;
+    name: string;
+    start_date: string;
+    end_date: string;
+}
+
+export interface StationVisitsFilesData {
+    actual_image: string | null;
+    actual_file?: string | null;
+    filename: string;
+    description: string;
+    name: string;
+    id: number;
+    visit: number;
+}
+
+export interface StationImagesData {
+    actual_image: string | null;
+    filename: string;
+    description: string;
+    name: string;
+    id: number;
+    station: number;
+}
+
+export interface StationImagesServiceData {
+    count: number;
+    total_count: number;
+    data: StationPhotosData[];
+    statusCode: number;
+}
+
 export interface PeopleServiceData {
     count: number;
     total_count: number;
@@ -248,7 +375,8 @@ export interface People {
     phone: string;
     address: string;
     photo_actual_file: string;
-    user: number;
+    user?: number | string;
+    user_name: string;
 }
 
 export interface EndpointCluster {

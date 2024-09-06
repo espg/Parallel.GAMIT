@@ -17,3 +17,7 @@ export { default as Overview } from "./Overview/Overview";
 // Users
 
 export { default as Users } from "./Users/Users";
+
+// Campaigns
+
+export { default as Campaigns } from "./Campaigns/Campaigns";

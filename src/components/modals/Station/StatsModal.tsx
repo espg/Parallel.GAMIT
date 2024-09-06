@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import {
     Alert,
+    ConfirmDeleteModal,
     DateTimePicker,
     Menu,
     MenuButton,
@@ -42,6 +43,7 @@ import {
     dateToUTC,
     dayFromDate,
     formattedDates,
+    showModal,
 } from "@utils/index";
 
 interface EditStatsModalProps {
@@ -79,6 +81,11 @@ const EditStatsModal = ({
         { status: number; msg: string; errors?: Errors } | undefined
     >(undefined);
 
+    const [modals, setModals] = useState<
+        | { show: boolean; title: string; type: "add" | "edit" | "none" }
+        | undefined
+    >(undefined);
+
     const [receivers, setReceivers] = useState<ReceiversData[]>([]);
     const [matchingReceivers, setMatchingReceivers] = useState<ReceiversData[]>(
         [],
@@ -112,9 +119,18 @@ const EditStatsModal = ({
 
     useEffect(() => {
         if (stationInfo && modalType === "edit") {
-            stationInfo.antenna_east = stationInfo.antenna_east.toString();
-            stationInfo.antenna_north = stationInfo.antenna_north.toString();
-            stationInfo.antenna_height = stationInfo.antenna_height.toString();
+            stationInfo.antenna_east =
+                stationInfo.antenna_east !== null
+                    ? stationInfo.antenna_east.toString()
+                    : "";
+            stationInfo.antenna_north =
+                stationInfo.antenna_north !== null
+                    ? stationInfo.antenna_north.toString()
+                    : "";
+            stationInfo.antenna_height =
+                stationInfo.antenna_height !== null
+                    ? stationInfo.antenna_height.toString()
+                    : "";
 
             dispatch({
                 type: "set",
@@ -143,20 +159,22 @@ const EditStatsModal = ({
 
         if (name === "receiver_code") {
             const match = receivers.filter((receiver) =>
-                receiver.receiver_code.toLowerCase().includes(value),
+                receiver.receiver_code
+                    .toLowerCase()
+                    .includes(value.toLowerCase()),
             );
             setMatchingReceivers(match);
         }
         if (name === "antenna_code") {
             const match = antennas.filter((ant) =>
-                ant.antenna_code.toLowerCase().includes(value),
+                ant.antenna_code.toLowerCase().includes(value.toLowerCase()),
             );
             setMatchingAntennas(match);
         }
 
         if (name === "height_code") {
             const match = heightcodes.filter((hc) =>
-                hc.height_code.toLowerCase().includes(value),
+                hc.height_code.toLowerCase().includes(value.toLowerCase()),
             );
             setMatchingHeightcodes(match);
         }
@@ -345,6 +363,10 @@ const EditStatsModal = ({
     const closeModal = () => {
         setStationInfo(undefined);
         reFetch();
+
+        STATION_INFO_STATE.network_code = nc ?? "";
+        STATION_INFO_STATE.station_code = sc ?? "";
+
         dispatch({
             type: "set",
             payload: STATION_INFO_STATE,
@@ -354,7 +376,7 @@ const EditStatsModal = ({
     // TODO: Refactor this to a custom hook
 
     useEffect(() => {
-        const handleEsc = (event) => {
+        const handleEsc = (event: { key: string }) => {
             if (event.key === "Escape") {
                 closeModal();
             }
@@ -365,6 +387,10 @@ const EditStatsModal = ({
             window.removeEventListener("keydown", handleEsc);
         };
     }, []);
+
+    useEffect(() => {
+        modals?.show && showModal(modals.title);
+    }, [modals]);
 
     return (
         <Modal
@@ -669,10 +695,30 @@ const EditStatsModal = ({
                             disabled={apiOkStatuses.includes(
                                 Number(msg?.status),
                             )}
-                            onClick={() => delStationInfo()}
+                            onClick={() =>
+                                setModals({
+                                    show: true,
+                                    title: "ConfirmDelete",
+                                    type: "edit",
+                                })
+                            }
                         >
                             Remove
                         </button>
+                    )}
+                    {modals && modals?.title === "ConfirmDelete" && (
+                        <ConfirmDeleteModal
+                            msg={msg}
+                            loading={loading}
+                            confirmRemove={() => delStationInfo()}
+                            closeModal={() => {
+                                setModals({
+                                    show: false,
+                                    title: "",
+                                    type: "edit",
+                                });
+                            }}
+                        />
                     )}
                 </div>
             </form>

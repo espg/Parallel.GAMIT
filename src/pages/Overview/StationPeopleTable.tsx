@@ -11,15 +11,9 @@ import useApi from "@hooks/useApi";
 import { useAuth } from "@hooks/useAuth";
 import { showModal } from "@utils";
 
-import { getPeopleService, getUsersService } from "@services";
+import { getPeopleService } from "@services";
 
-import {
-    GetParams,
-    People,
-    PeopleServiceData,
-    UsersData,
-    UsersServiceData,
-} from "@types";
+import { GetParams, People, PeopleServiceData } from "@types";
 
 const PeopleTable = () => {
     const { token, logout } = useAuth();
@@ -43,8 +37,6 @@ const PeopleTable = () => {
     const [peoples, setPeoples] = useState<People[]>([]);
     const [people, setPeople] = useState<People | undefined>(undefined);
 
-    const [users, setUsers] = useState<UsersData[]>([]);
-
     const [activePage, setActivePage] = useState<number>(1);
     const [pages, setPages] = useState<number>(0);
     const PAGES_TO_SHOW = 2;
@@ -60,15 +52,6 @@ const PeopleTable = () => {
             console.error(err);
         } finally {
             setLoading(false);
-        }
-    };
-
-    const getUsers = async () => {
-        try {
-            const res = await getUsersService<UsersServiceData>(api);
-            setUsers(res.data);
-        } catch (err) {
-            console.error(err);
         }
     };
 
@@ -115,7 +98,6 @@ const PeopleTable = () => {
 
     useEffect(() => {
         getPeople();
-        getUsers();
     }, []); // eslint-disable-line
 
     const titles = [
@@ -139,7 +121,7 @@ const PeopleTable = () => {
                     email: st.email,
                     phone: st.phone,
                     address: st.address,
-                    user: users.find((u) => u.id === st.user)?.username,
+                    user: st.user_name,
                     photo: st.photo_actual_file,
                 }),
             );
@@ -148,6 +130,7 @@ const PeopleTable = () => {
     useEffect(() => {
         modals?.show && showModal(modals.title);
     }, [modals]);
+
     return (
         <TableCard
             title={"Station People"}
@@ -184,7 +167,6 @@ const PeopleTable = () => {
             {modals?.show && modals.title === "EditPerson" && (
                 <StationPeopleModal
                     Person={people}
-                    users={users}
                     modalType={modals.type}
                     setStateModal={setModals}
                     setPerson={setPeople}

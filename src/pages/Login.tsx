@@ -254,7 +254,7 @@ const Login = () => {
                                 )}
                             </div>
                         </div>
-                        <div className="flex items-center mb-6 -mt-4">
+                        {/* <div className="flex items-center mb-6 -mt-4">
                             <div className="flex ml-auto">
                                 <a
                                     href="#"
@@ -264,7 +264,7 @@ const Login = () => {
                                     Forgot Your Password?
                                 </a>
                             </div>
-                        </div>
+                        </div> */}
                         <div className="flex w-full">
                             <button
                                 type="submit"
@@ -288,7 +288,7 @@ const Login = () => {
                         </div>
                     </form>
                 </div>
-                <div className="flex items-center justify-center mt-6">
+                {/* <div className="flex items-center justify-center mt-6">
                     <a
                         href="#"
                         target="_blank"
@@ -299,7 +299,7 @@ const Login = () => {
                             You don&#x27;t have an account?
                         </span>
                     </a>
-                </div>
+                </div> */}
             </div>
         </>
     );

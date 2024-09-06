@@ -127,7 +127,7 @@ const RolesTable = () => {
                 setState={setRole}
                 state={roles}
             />
-            {body ? (
+            {body && body.length > 0 ? (
                 <Pagination
                     pages={rolesPages}
                     pagesToShow={PAGES_TO_SHOW}

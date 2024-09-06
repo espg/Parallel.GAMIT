@@ -3,7 +3,6 @@ import { Alert, MenuButton, MenuCheckbox, Modal } from "@componentsReact";
 
 import {
     getEndpointClustersService,
-    getPagesService,
     postRoleService,
     putRoleService,
 } from "@services";
@@ -15,7 +14,6 @@ import {
     EndpointCluster,
     ErrorResponse,
     Errors,
-    FrontPagesServiceData,
     Role,
 } from "@types";
 import { apiOkStatuses } from "@utils/index";
@@ -75,50 +73,33 @@ const AddRoleModal = ({
 
     const getEndpointClusters = async () => {
         try {
-            const res =
-                await getEndpointClustersService<ClusterServiceData>(api);
+            const res = await getEndpointClustersService<ClusterServiceData>(
+                api,
+                {
+                    offset: 0,
+                    limit: 0,
+                    role_type:
+                        formState.permissionSelected === "api"
+                            ? "API"
+                            : "FRONT",
+                },
+            );
 
             dispatch({
                 type: "change_value",
                 payload: {
-                    inputName: "groups.api",
+                    inputName: `groups.${formState.permissionSelected}`,
                     inputValue: res.data as any,
                 },
             });
 
-            if (Role !== undefined && Role?.role_api) {
-                dispatch({
-                    type: "change_value",
-                    payload: {
-                        inputName: "selectedGroup",
-                        inputValue: res.data as any,
-                    },
-                });
-            }
-        } catch (err) {
-            console.error(err);
-        }
-    };
-
-    const getEndpointPages = async () => {
-        try {
-            const res = await getPagesService<FrontPagesServiceData>(api);
             dispatch({
                 type: "change_value",
                 payload: {
-                    inputName: "groups.front",
+                    inputName: "selectedGroup",
                     inputValue: res.data as any,
                 },
             });
-            if (Role !== undefined && !Role?.role_api) {
-                dispatch({
-                    type: "change_value",
-                    payload: {
-                        inputName: "selectedGroup",
-                        inputValue: res.data as any,
-                    },
-                });
-            }
         } catch (err) {
             console.error(err);
         }
@@ -133,14 +114,7 @@ const AddRoleModal = ({
                 role_front: formState.permissionSelected === "front",
                 allow_all: formState.allowAllEndpoints,
                 is_active: formState.activeRole,
-                endpoints_clusters:
-                    formState.permissionSelected === "api"
-                        ? endpointClusters
-                        : [],
-                pages:
-                    formState.permissionSelected === "front"
-                        ? endpointClusters
-                        : [],
+                endpoints_clusters: endpointClusters,
             };
             const res = await postRoleService<Role | ErrorResponse>(api, data);
             if ("status" in res) {
@@ -171,14 +145,7 @@ const AddRoleModal = ({
                 role_front: formState.permissionSelected === "front",
                 allow_all: formState.allowAllEndpoints,
                 is_active: formState.activeRole,
-                endpoints_clusters:
-                    formState.permissionSelected === "api"
-                        ? endpointClusters
-                        : [],
-                pages:
-                    formState.permissionSelected === "front"
-                        ? endpointClusters
-                        : [],
+                endpoints_clusters: endpointClusters,
             };
 
             const res = await putRoleService<Role | ErrorResponse>(
@@ -207,8 +174,6 @@ const AddRoleModal = ({
 
     const fetch = () => {
         reFetch();
-        getEndpointClusters();
-        getEndpointPages();
     };
 
     useEffect(() => {
@@ -257,13 +222,17 @@ const AddRoleModal = ({
                         return e.toString();
                     });
                 } else {
-                    return Role.pages.map((e) => {
-                        return e.toString();
-                    });
+                    return [];
                 }
             });
         }
     }, [Role, modalType]); //eslint-disable-line
+
+    useEffect(() => {
+        if (formState.permissionSelected) {
+            getEndpointClusters();
+        }
+    }, [formState.permissionSelected]); //eslint-disable-line
 
     const handleChange = (e: HTMLInputElement | HTMLSelectElement) => {
         const { name, value } = e;
@@ -509,16 +478,15 @@ const AddRoleModal = ({
                                     showMenu?.type === "endpoints" && (
                                         <ul // NOTA: PARA RESOLVER EL PROBLEMA DEL WRAP PUEDO HACER 2 MENUES ?¿ DOS UL UNO QUE TENGA
                                             // LOS OBJETOS Y EL OTRO QUE TENGA LOS INDIVIDUALES SI ES ASÍ SACAR EL OVERFLOW-X-AUTO
-                                            tabIndex={0}
-                                            className="menu overflow-x-auto items-center w-full max-h-72 mt-2 
-                                    bg-neutral-content rounded-box overflow-y-auto "
+                                            className="menu overflow-x-auto items-center w-full max-h-[25rem] mt-2 
+                                    bg-neutral-content rounded-box overflow-y-auto space-y-6"
                                             style={{
                                                 justifyContent: "space-between",
+                                                display: "grid",
+                                                gridTemplateColumns:
+                                                    "repeat(3,1fr)",
                                             }}
                                         >
-                                            <label className="absolute text-secondary text-xs z-0 left-10">
-                                                {formState.permissionSelected?.toUpperCase()}
-                                            </label>
                                             {selectedGroup &&
                                                 Object.keys(selectedGroup)
                                                     ?.length > 0 &&

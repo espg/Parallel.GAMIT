@@ -1,14 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
-import { MonumentModal, Pagination, Table } from "@componentsReact";
+import { MonumentModal, Pagination, Table, TableCard } from "@componentsReact";
 
 import useApi from "@hooks/useApi";
 import { useAuth } from "@hooks/useAuth";
 
 import { getMonumentsTypesService } from "@services";
-import { showModal } from "@utils/index";
+import { showModal } from "@utils";
 
 import { GetParams, MonumentTypes, MonumentTypesServiceData } from "@types";
-import TableCard from "@components/table/TableCard";
 
 const MonumentsTable = () => {
     const { token, logout } = useAuth();
@@ -145,7 +144,7 @@ const MonumentsTable = () => {
                 setState={setMonument}
                 state={monuments}
             />
-            {body ? (
+            {body && body.length > 0 ? (
                 <Pagination
                     pages={pages}
                     pagesToShow={PAGES_TO_SHOW}

@@ -1,30 +1,85 @@
 import {
     ArrowRightEndOnRectangleIcon,
     MegaphoneIcon,
+    ServerIcon,
     Squares2X2Icon,
     UserCircleIcon,
     UserGroupIcon,
-    UserIcon,
 } from "@heroicons/react/24/outline";
+import useApi from "@hooks/useApi";
 
 import { useAuth } from "@hooks/useAuth";
-import { jwtDeserializer } from "@utils/index";
+import { getServerHealthService } from "@services";
+import { ErrorResponse } from "@types";
+import { jwtDeserializer } from "@utils";
+import { useEffect, useState } from "react";
 
 import { Link } from "react-router-dom";
 
+type healthCheck = {
+    result: string;
+    statusCode: number;
+};
+
 const Nav = () => {
     const { logout, token, userPhoto } = useAuth();
+    const api = useApi(token, logout);
 
     const tokenDeserialized = jwtDeserializer(token as string);
-
     const userName = tokenDeserialized?.username;
+
+    const [serverHealth, setServerHealth] = useState<healthCheck | null>(null);
+
+    const serverHealthCheck = async () => {
+        try {
+            const res = await getServerHealthService<
+                healthCheck | ErrorResponse
+            >(api);
+            if ("status" in res) {
+                setServerHealth({
+                    result: res.response.errors[0]?.detail,
+                    statusCode: res.statusCode,
+                });
+            } else {
+                setServerHealth(res);
+            }
+        } catch (err) {
+            setServerHealth({
+                result: "Server is down",
+                statusCode: 500,
+            });
+            console.error(err);
+        }
+    };
+
+    useEffect(() => {
+        serverHealthCheck();
+
+        const intervalId = setInterval(serverHealthCheck, 30000);
+
+        return () => clearInterval(intervalId);
+    }, []); // eslint-disable-line
 
     return (
         <div
             className="navbar bg-gray-800 text-white"
             style={{ maxHeight: "none", minHeight: "8vh" }}
         >
-            <div className="navbar-start"></div>
+            <div className="navbar-start">
+                <div
+                    className="indicator ml-4"
+                    title={serverHealth ? serverHealth.result : ""}
+                >
+                    <ServerIcon
+                        fill="none"
+                        className="size-7"
+                        strokeWidth={2}
+                    />
+                    <span
+                        className={`badge badge-xs badge-${serverHealth ? (serverHealth?.statusCode === 200 ? "success" : "error") : "neutral"} indicator-item`}
+                    ></span>
+                </div>
+            </div>
             <div className="navbar-center">
                 <Link to={"/"} className="text-2xl ml-6">
                     Parallel.GAMIT
@@ -45,16 +100,6 @@ const Nav = () => {
                 >
                     <Squares2X2Icon className="size-8" />
                 </Link>
-                {/* <button className="btn btn-ghost btn-circle">
-                    <div className="indicator">
-                        <BellIcon
-                            fill="none"
-                            className="size-5"
-                            strokeWidth={2}
-                        />
-                        <span className="badge badge-xs badge-primary indicator-item"></span>
-                    </div>
-                </button> */}
                 <div className="dropdown dropdown-end">
                     <div
                         tabIndex={0}
@@ -81,7 +126,7 @@ const Nav = () => {
                                 <strong>{userName?.toUpperCase()}</strong>
                             </span>
                         </div>
-                        <li className="">
+                        {/* <li className="">
                             <a //TODO: CHANGE TO LINK
                                 className="hover:bg-slate-600 flex justify-start "
                                 onClick={() => console.log("Profile")}
@@ -90,7 +135,7 @@ const Nav = () => {
 
                                 <span className="ml-[40px]">Profile</span>
                             </a>
-                        </li>
+                        </li> */}
                         <li className="">
                             <Link
                                 className="hover:bg-slate-600 flex justify-start focus:text-primary"

@@ -2,12 +2,13 @@ import { useEffect, useMemo, useState } from "react";
 
 import {
     Alert,
+    ConfirmDeleteModal,
     LargeSkeleton,
     Menu,
     MenuButton,
     MenuContent,
     Modal,
-    StationFilesModal,
+    StationAddFileModal,
 } from "@componentsReact";
 
 import useApi from "@hooks/useApi";
@@ -15,16 +16,21 @@ import { useAuth } from "@hooks/useAuth";
 import UseFormReducer from "@hooks/useFormReducer";
 
 import {
-    ArchiveBoxIcon,
+    ArrowDownTrayIcon,
     ClipboardDocumentIcon,
     PencilSquareIcon,
+    PlusCircleIcon,
+    TrashIcon,
 } from "@heroicons/react/24/outline";
+
 import defPhoto from "@assets/images/placeholder.png";
 
 import {
+    delStationsFilesAttachedService,
     getMonumentsTypesService,
     getRinexService,
     getStationInfoService,
+    getStationsFilesAttachedService,
     getStationStatusService,
     getStationTypesService,
     patchStationMetaService,
@@ -42,6 +48,8 @@ import {
     RinexData,
     RinexServiceData,
     StationData,
+    StationFilesData,
+    StationFilesServiceData,
     StationInfoData,
     StationInfoServiceData,
     StationMetadataServiceData,
@@ -54,6 +62,7 @@ interface StationMetadataProps {
     size?: "sm" | "md" | "lg" | "xl" | "fit";
     station?: StationData | undefined;
     stationMeta: StationMetadataServiceData | undefined;
+    refetchStationMeta?: () => void;
     refetch: () => void;
     setModalState: React.Dispatch<
         React.SetStateAction<
@@ -68,6 +77,7 @@ const StationMetadataModal = ({
     station,
     stationMeta,
     size,
+    refetchStationMeta,
     refetch,
     setModalState,
 }: StationMetadataProps) => {
@@ -78,6 +88,10 @@ const StationMetadataModal = ({
         { status: number; msg: string; errors?: Errors } | undefined
     >(undefined);
     const [stationMsg, setStationMsg] = useState<
+        { status: number; msg: string; errors?: Errors } | undefined
+    >(undefined);
+
+    const [fileMsg, setFileMsg] = useState<
         { status: number; msg: string; errors?: Errors } | undefined
     >(undefined);
 
@@ -111,6 +125,14 @@ const StationMetadataModal = ({
         undefined,
     );
 
+    const [fileType, setFileType] = useState<"meta" | "none">("none");
+
+    const [files, setFiles] = useState<StationFilesData[] | undefined>(
+        undefined,
+    );
+
+    const [fileToDel, setFileToDel] = useState<number | undefined>(undefined);
+
     const [modals, setModals] = useState<
         | { show: boolean; title: string; type: "add" | "edit" | "none" }
         | undefined
@@ -133,9 +155,9 @@ const StationMetadataModal = ({
                         api,
                     );
 
-                setStationType(types.data);
-                setMonumentType(monuments.data);
-                setStationStatus(status.data);
+                setStationType(types.data ?? []);
+                setMonumentType(monuments.data ?? []);
+                setStationStatus(status.data ?? []);
             }
         } catch (err) {
             console.error(err);
@@ -198,6 +220,99 @@ const StationMetadataModal = ({
         }
     };
 
+    const stationId = stationMeta?.station ?? undefined;
+
+    const getFiles = async () => {
+        try {
+            setLoading(true);
+            if (stationId) {
+                const res =
+                    await getStationsFilesAttachedService<StationFilesServiceData>(
+                        api,
+                        { station_api_id: stationId, offset: 0, limit: 0 },
+                    );
+                setFiles(res.data);
+            }
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const delFile = async (id: number | undefined) => {
+        try {
+            setLoading(true);
+            if (stationId && typeof id === "number") {
+                const res =
+                    await delStationsFilesAttachedService<ErrorResponse>(
+                        api,
+                        id,
+                    );
+
+                if ("status" in res && res.status !== "success") {
+                    setFileMsg({
+                        status: res.statusCode,
+                        msg: res.response.type,
+                        errors: res.response,
+                    });
+                } else {
+                    setFileMsg({
+                        status: res.statusCode,
+                        msg: "File deleted successfully",
+                    });
+                    getFiles();
+                }
+            } else {
+                setFileMsg({
+                    status: 400,
+                    msg: "File not found",
+                });
+            }
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const delFileMeta = async () => {
+        try {
+            setLoading(true);
+            if (stationId) {
+                const formData = new FormData();
+
+                formData.append("navigation_file_delete", "true");
+                formData.append("station", String(stationId));
+
+                const res = await patchStationMetaService<
+                    StationFilesData | ErrorResponse
+                >(api, Number(stationMeta?.station), formData);
+                if (res.statusCode !== 200 && "status" in res) {
+                    setFileMsg({
+                        status: res.statusCode,
+                        msg: res.response.type,
+                        errors: res.response,
+                    });
+                } else if (res.statusCode === 200) {
+                    setFileMsg({
+                        status: res.statusCode,
+                        msg: "File deleted successfully",
+                    });
+                    refetchStationMeta && refetchStationMeta();
+                }
+            }
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        getFiles();
+    }, [stationId]);
+
     useEffect(() => {
         getTypes();
         getRinex();
@@ -218,6 +333,8 @@ const StationMetadataModal = ({
             rinex: {
                 first_rinex: firstRinex?.observation_e_time ?? "",
                 last_rinex: lastRinex?.observation_e_time ?? "",
+                comments: stationMeta?.comments ?? "",
+                navigation_file: stationMeta?.navigation_filename ?? "",
             },
             booleans: {
                 has_battery: stationMeta?.has_battery ?? false,
@@ -241,6 +358,7 @@ const StationMetadataModal = ({
                     stationStatus.find(
                         (st) => st.id === Number(stationMeta?.status),
                     )?.name ?? "",
+                remote_access_link: stationMeta?.remote_access_link ?? "",
             },
             station: {
                 lat: String(station?.lat) ?? "",
@@ -262,7 +380,9 @@ const StationMetadataModal = ({
         });
     }, [formattedData]);
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleChange = (
+        e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+    ) => {
         const { value, name } = e.target;
         dispatch({
             type: "change_value",
@@ -273,19 +393,19 @@ const StationMetadataModal = ({
         });
         if (name === "stationMeta.monument_type") {
             const match = monumentType?.filter((mt) =>
-                mt.name.toLowerCase().includes(value),
+                mt.name.toLowerCase().includes(value.toLowerCase()),
             );
             setMatchingMonuments(match);
         }
         if (name === "stationMeta.status") {
             const match = stationStatus?.filter((st) =>
-                st.name.toLowerCase().includes(value),
+                st.name.toLowerCase().includes(value.toLowerCase()),
             );
             setMatchingStatus(match);
         }
         if (name === "stationMeta.station_type") {
             const match = stationType?.filter((st) =>
-                st.name.toLowerCase().includes(value),
+                st.name.toLowerCase().includes(value.toLowerCase()),
             );
             setMatchingTypes(match);
         }
@@ -299,6 +419,9 @@ const StationMetadataModal = ({
                 const meta = {
                     has_battery: formState.booleans.has_battery,
                     has_communications: formState.booleans.has_communications,
+                    comments: formState.rinex.comments,
+                    remote_access_link:
+                        formState.stationMeta.remote_access_link,
                     battery_description:
                         formState.booleansDesc.battery_description,
                     communications_description:
@@ -312,7 +435,17 @@ const StationMetadataModal = ({
                     status: stationStatus.find(
                         (st) => st.name === formState.stationMeta.status,
                     )?.id,
+                    navigation_file_delete: false,
+                    station: stationId,
                 };
+
+                const formData = new FormData();
+
+                Object.entries(meta).forEach(([key, value]) => {
+                    if (value) {
+                        formData.append(key, String(value));
+                    }
+                });
 
                 const resMeta = await patchStationMetaService<
                     StationMetadataServiceData | ErrorResponse
@@ -332,13 +465,13 @@ const StationMetadataModal = ({
                 const res = await patchStationService<
                     ExtendedStationData | ErrorResponse
                 >(api, Number(station?.api_id), formState.station);
-                if ("status" in res) {
+                if (res.statusCode !== 200 && "status" in res) {
                     setStationMsg({
                         status: res.statusCode,
                         msg: res.msg,
                         errors: res.response,
                     });
-                } else {
+                } else if (res.statusCode === 200) {
                     setStationMsg({
                         status: Number(res.statusCode),
                         msg: "Station updated successfully",
@@ -349,7 +482,7 @@ const StationMetadataModal = ({
                     setTimeout(() => {
                         refetch();
                         setEdit(false);
-                    }, 3000);
+                    }, 1000);
                 }
             }
         } catch (err) {
@@ -359,29 +492,19 @@ const StationMetadataModal = ({
         }
     };
 
-    // TODO: FALTA TERMINAR EL EQUIPMENT
-
-    // FORMDATA
-
-    //     navigation_actual_file
-    // :
-    // null
-    // navigation_filename
-    // :
-    // ""
-    // observations_actual_file
-    // :
-    // null
-    // observations_filename
-    // :
-    // ""
-
-    // SE VAN LOS 4 CAMPOS Y QUEDAN NAVIGATION_FILE Y OBSERVATIONS_FILE PARA EL ARCHIVO QUE EL USUARIO SUBE.
-    // STATION-ATTACHED FILES SON LOS ARCHIVOS DE LA ESTACION
-
-    const generalFields = ["Station Type", "Monument", "Status"];
+    const generalFields = [
+        "Station Type",
+        "Monument",
+        "Status",
+        "Remote Access Link",
+    ];
     const generalFields2 = ["Battery", "Communications"];
-    const generalFields3 = ["First rinex", "Last rinex"];
+    const generalFields3 = [
+        "First rinex",
+        "Last rinex",
+        "Comments",
+        "Navigation File",
+    ];
     const equipmentFields = [
         "Antenna Code",
         "Antenna Serial",
@@ -407,18 +530,6 @@ const StationMetadataModal = ({
                 <h3 className="font-bold text-center text-3xl my-2 grow">
                     Metadata
                 </h3>
-                <button
-                    className="flex items-center btn btn-ghost btn-circle"
-                    onClick={() =>
-                        setModals({
-                            show: true,
-                            title: "StationFiles",
-                            type: "edit",
-                        })
-                    }
-                >
-                    <ArchiveBoxIcon title="files" className="size-8" />
-                </button>
                 <button
                     className="flex items-center btn btn-ghost btn-circle"
                     onClick={() => setEdit(!edit)}
@@ -494,7 +605,7 @@ const StationMetadataModal = ({
                                                                         }
                                                                     />
                                                                     {errorBadge && (
-                                                                        <span className="badge badge-error self-end">
+                                                                        <span className="badge badge-error self-start -mt-2">
                                                                             {
                                                                                 errorBadge.code
                                                                             }
@@ -789,7 +900,10 @@ const StationMetadataModal = ({
                                     )}
                                     {Object.entries(formState.rinex).map(
                                         ([key, value], idx) => {
-                                            if (key) {
+                                            if (
+                                                key !== "comments" &&
+                                                key !== "navigation_file"
+                                            ) {
                                                 return (
                                                     <div key={idx}>
                                                         <div className="text-sm font-bold flex items-center">
@@ -813,6 +927,177 @@ const StationMetadataModal = ({
                                                                 </span>
                                                             )}
                                                         </p>
+                                                    </div>
+                                                );
+                                            } else {
+                                                const errorBadge =
+                                                    metaMsg?.errors?.errors?.find(
+                                                        (error) =>
+                                                            error.attr === key,
+                                                    );
+                                                return (
+                                                    <div key={idx}>
+                                                        <div className="text-sm font-bold flex items-center justify-between">
+                                                            {
+                                                                generalFields3[
+                                                                    idx
+                                                                ]
+                                                            }
+                                                            {key ===
+                                                                "navigation_file" && (
+                                                                <button
+                                                                    className="btn btn-ghost btn-circle ml-2 -mt-2"
+                                                                    onClick={() => {
+                                                                        setModals(
+                                                                            {
+                                                                                show: true,
+                                                                                title: "AddFile",
+                                                                                type: "add",
+                                                                            },
+                                                                        );
+                                                                        setFileType(
+                                                                            "meta",
+                                                                        );
+                                                                    }}
+                                                                    disabled={
+                                                                        formState
+                                                                            .rinex
+                                                                            .navigation_file !==
+                                                                        ""
+                                                                    }
+                                                                >
+                                                                    <PlusCircleIcon
+                                                                        strokeWidth={
+                                                                            1.5
+                                                                        }
+                                                                        stroke="currentColor"
+                                                                        className="size-6"
+                                                                    />
+                                                                </button>
+                                                            )}
+                                                        </div>
+
+                                                        {edit ? (
+                                                            <div className="flex flex-col space-y-1">
+                                                                {key ===
+                                                                "comments" ? (
+                                                                    <label
+                                                                        className={`form-control`}
+                                                                        title={
+                                                                            errorBadge
+                                                                                ? errorBadge.detail
+                                                                                : ""
+                                                                        }
+                                                                    >
+                                                                        <textarea
+                                                                            className={`textarea textarea-bordered w-full ${errorBadge ? "textarea-error" : ""}`}
+                                                                            autoComplete="off"
+                                                                            value={
+                                                                                formState
+                                                                                    .rinex[
+                                                                                    key as keyof typeof formState.rinex
+                                                                                ] ??
+                                                                                ""
+                                                                            }
+                                                                            name={
+                                                                                "rinex." +
+                                                                                key
+                                                                            }
+                                                                            onChange={(
+                                                                                e,
+                                                                            ) =>
+                                                                                handleChange(
+                                                                                    e,
+                                                                                )
+                                                                            }
+                                                                        />
+                                                                        {errorBadge && (
+                                                                            <span className="badge badge-error self-end">
+                                                                                {
+                                                                                    errorBadge.code
+                                                                                }
+                                                                            </span>
+                                                                        )}
+                                                                    </label>
+                                                                ) : (
+                                                                    <div className="bg-neutral-content p-4 rounded-md flex-grow flex items-center">
+                                                                        {formState
+                                                                            .rinex[
+                                                                            key as keyof typeof formState.rinex
+                                                                        ] && (
+                                                                            <button
+                                                                                className="btn btn-ghost btn-circle mr-4"
+                                                                                onClick={() => {
+                                                                                    setModals(
+                                                                                        {
+                                                                                            show: true,
+                                                                                            title: "ConfirmDelete",
+                                                                                            type: "edit",
+                                                                                        },
+                                                                                    );
+                                                                                    setFileType(
+                                                                                        "meta",
+                                                                                    );
+                                                                                }}
+                                                                            >
+                                                                                <TrashIcon className="size-6 text-red-600" />
+                                                                            </button>
+                                                                        )}
+                                                                        <p>
+                                                                            {formState
+                                                                                .rinex[
+                                                                                key as keyof typeof formState.rinex
+                                                                            ] ? (
+                                                                                formState
+                                                                                    .rinex[
+                                                                                    key as keyof typeof formState.rinex
+                                                                                ]
+                                                                            ) : (
+                                                                                <span className="text-gray-400">
+                                                                                    No
+                                                                                    info
+                                                                                </span>
+                                                                            )}
+                                                                        </p>
+                                                                        {formState
+                                                                            .rinex[
+                                                                            key as keyof typeof formState.rinex
+                                                                        ] && (
+                                                                            <a
+                                                                                className="btn-circle btn-ghost flex justify-center w-4/12"
+                                                                                download={
+                                                                                    formState
+                                                                                        .rinex
+                                                                                        .navigation_file
+                                                                                }
+                                                                                href={`data:application/pdf;base64,${stationMeta?.navigation_actual_file}`}
+                                                                            >
+                                                                                <ArrowDownTrayIcon className="size-6 self-center" />
+                                                                            </a>
+                                                                        )}
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        ) : (
+                                                            <p>
+                                                                {formState
+                                                                    .rinex[
+                                                                    key as keyof typeof formState.rinex
+                                                                ] &&
+                                                                formState.rinex[
+                                                                    key as keyof typeof formState.rinex
+                                                                ] !== "" ? (
+                                                                    formState
+                                                                        .rinex[
+                                                                        key as keyof typeof formState.rinex
+                                                                    ]
+                                                                ) : (
+                                                                    <span className="text-gray-400">
+                                                                        No info
+                                                                    </span>
+                                                                )}
+                                                            </p>
+                                                        )}
                                                     </div>
                                                 );
                                             }
@@ -1134,6 +1419,92 @@ const StationMetadataModal = ({
                             </div>
                         </div>
                     </div>
+                    <div className="grid grid-cols-1 space-y-4 grid-flow-dense">
+                        <div className="card bg-base-200 grow shadow-xl">
+                            <h2 className="card-title border-b-2 border-base-300 p-2 justify-between">
+                                Attached Files
+                                <button
+                                    className="btn btn-ghost btn-circle ml-2"
+                                    onClick={() => {
+                                        setModals({
+                                            show: true,
+                                            title: "AddFile",
+                                            type: "add",
+                                        });
+                                    }}
+                                >
+                                    <PlusCircleIcon
+                                        strokeWidth={1.5}
+                                        stroke="currentColor"
+                                        className="w-8 h-10"
+                                    />
+                                </button>
+                            </h2>
+                            <div className="card-body">
+                                <div
+                                    className={`grid ${files && files.length > 0 ? "grid-cols-3 md:grid-cols-2" : "grid-cols-1"} grid-flow-dense gap-2`}
+                                >
+                                    {files && files.length > 0 ? (
+                                        files.map((file) => {
+                                            return (
+                                                <div
+                                                    className="flex items-center w-full rounded-md bg-neutral-content"
+                                                    key={
+                                                        file.filename + file.id
+                                                    }
+                                                >
+                                                    <div className="flex-grow overflow-hidden ">
+                                                        <div className="p-6 flex w-full justify-between items-center">
+                                                            <button
+                                                                className="btn btn-ghost btn-circle mr-4"
+                                                                onClick={() => {
+                                                                    setModals({
+                                                                        show: true,
+                                                                        title: "ConfirmDelete",
+                                                                        type: "edit",
+                                                                    });
+                                                                    setFileToDel(
+                                                                        file.id,
+                                                                    );
+                                                                }}
+                                                            >
+                                                                <TrashIcon className="size-8 text-red-600" />
+                                                            </button>
+                                                            <div className="flex flex-col w-8/12 text-pretty break-words max-w-full">
+                                                                <h2 className="card-title">
+                                                                    {
+                                                                        file.filename
+                                                                    }
+                                                                </h2>
+                                                                <p>
+                                                                    {
+                                                                        file.description
+                                                                    }
+                                                                </p>
+                                                            </div>
+                                                            <a
+                                                                className="btn-circle btn-ghost flex justify-center w-4/12"
+                                                                download={
+                                                                    file.filename
+                                                                }
+                                                                href={`data:application/pdf;base64,${file.actual_file}`}
+                                                            >
+                                                                <ArrowDownTrayIcon className="size-6 self-center" />
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })
+                                    ) : (
+                                        <div className="text-center text-neutral text-2xl font-bold w-full rounded-md bg-neutral-content p-6">
+                                            There is no files registered
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             )}
             {edit && (
@@ -1143,12 +1514,17 @@ const StationMetadataModal = ({
                             metaMsg?.status === 200 &&
                             stationMsg?.status === 200
                                 ? metaMsg
-                                : undefined
+                                : metaMsg?.status !== 200
+                                  ? metaMsg
+                                  : stationMsg?.status !== 200
+                                    ? stationMsg
+                                    : undefined
                         }
                     />
                     <button
                         className="btn btn-success w-[140px] mt-4"
                         onClick={() => updateMetadata()}
+                        disabled={loading || updateLoading}
                     >
                         {updateLoading && (
                             <div
@@ -1161,12 +1537,43 @@ const StationMetadataModal = ({
                     </button>
                 </div>
             )}
-            {modals && modals?.title === "StationFiles" && (
-                <StationFilesModal
-                    stationId={stationMeta?.station ?? undefined}
-                    modalType={modals.title}
-                    reFetch={refetch}
+
+            {modals && modals?.title === "AddFile" && (
+                <StationAddFileModal
+                    stationId={stationId}
+                    stationMetaId={stationMeta?.station}
+                    meta={fileType === "meta"}
+                    refetchStationMeta={() => {
+                        refetchStationMeta && refetchStationMeta();
+                        setFileType("none");
+                    }}
+                    reFetch={() => {
+                        getFiles();
+                        setFileType("none");
+                    }}
                     setStateModal={setModals}
+                />
+            )}
+
+            {modals && modals?.title === "ConfirmDelete" && (
+                <ConfirmDeleteModal
+                    msg={fileMsg}
+                    loading={loading}
+                    confirmRemove={() =>
+                        fileType === "meta"
+                            ? delFileMeta()
+                            : delFile(fileToDel as number)
+                    }
+                    closeModal={() => {
+                        setModals({
+                            show: false,
+                            title: "",
+                            type: "edit",
+                        });
+                        setFileType("none");
+
+                        setFileMsg(undefined);
+                    }}
                 />
             )}
         </Modal>

@@ -1,12 +1,21 @@
-import { Error, Login, Main, Users, Station, Overview } from "@pagesReact";
-import { StationMain, StationPeople } from "@componentsReact";
-
 import {
     Route,
     createBrowserRouter,
     RouterProvider,
     createRoutesFromElements,
 } from "react-router-dom";
+
+import {
+    Error,
+    Login,
+    Main,
+    Users,
+    Station,
+    Overview,
+    Campaigns,
+} from "@pagesReact";
+
+import { StationMain, StationPeople, StationVisits } from "@componentsReact";
 
 import { ProtectedRoute, UnprotectedRoute } from "@routes/index";
 import { AuthProvider } from "@hooks/useAuth";
@@ -28,6 +37,15 @@ const router = createBrowserRouter(
                 }}
             >
                 <Route index element={<Main />} />
+                <Route
+                    path="campaigns"
+                    element={<Campaigns />}
+                    handle={{
+                        crumb: () => {
+                            return "campaigns";
+                        },
+                    }}
+                />
                 <Route
                     path="overview"
                     element={<Overview />}
@@ -62,6 +80,15 @@ const router = createBrowserRouter(
                         handle={{
                             crumb: () => {
                                 return "People";
+                            },
+                        }}
+                    />
+                    <Route
+                        path="visits"
+                        element={<StationVisits />}
+                        handle={{
+                            crumb: () => {
+                                return "Visits";
                             },
                         }}
                     />

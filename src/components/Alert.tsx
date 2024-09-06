@@ -6,6 +6,7 @@ interface AlertProps {
 
 const Alert = ({ msg }: AlertProps) => {
     const errorDetail = msg?.errors?.errors?.[0]?.detail;
+
     return (
         <>
             {msg && (

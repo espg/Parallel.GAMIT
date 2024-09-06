@@ -145,7 +145,7 @@ const StationInfoModal = ({
         if (station && bParams.network_code && bParams.station_code) {
             getStationInfo();
         }
-    }, [station]);
+    }, [station]); // eslint-disable-line
 
     useEffect(() => {
         modals?.show && showModal(modals.title);

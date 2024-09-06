@@ -145,7 +145,7 @@ const StationStatusTable = () => {
                 setState={setStatus}
                 state={stationStatus}
             />
-            {body ? (
+            {body && body.length > 0 ? (
                 <Pagination
                     pages={pages}
                     pagesToShow={PAGES_TO_SHOW}

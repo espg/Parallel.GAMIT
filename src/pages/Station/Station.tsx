@@ -120,15 +120,18 @@ const Station = () => {
         : "Station not found";
 
     return (
-        <div className="max-h-[92vh] flex transition-all duration-200">
+        <div className="max-h-[92vh] transition-all duration-200">
             {loading ? (
-                <Skeleton />
+                <div className="mt-24">
+                    <Skeleton />
+                </div>
             ) : (
-                <>
+                <div className="flex w-full">
                     <Sidebar
                         show={showSidebar}
                         station={station}
                         stationMeta={stationMeta}
+                        refetchStationMeta={getStationMeta}
                         refetch={refetch}
                         setShow={setShowSidebar}
                     />
@@ -136,13 +139,13 @@ const Station = () => {
                         sidebar={showSidebar}
                         state={station ? station : locationState}
                     />
-                    <div className="w-full flex flex-col pt-20 flex-wrap min-h-[92vh]">
+                    <div className="w-full flex flex-col pt-20">
                         <h1 className="text-6xl font-bold text-center">
                             {stationTitle}
                         </h1>
                         <Outlet context={station} />
                     </div>{" "}
-                </>
+                </div>
             )}
         </div>
     );
