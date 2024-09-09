@@ -23,11 +23,15 @@ interface Props {
     >;
 }
 
+interface OutletContext {
+    station: StationData;
+}
+
 const StationPhotoModal = ({ modalType, reFetch, setStateModal }: Props) => {
     const { token, logout } = useAuth();
     const api = useApi(token, logout);
 
-    const station: StationData = useOutletContext();
+    const { station } = useOutletContext<OutletContext>();
 
     const [loading, setLoading] = useState<boolean>(false);
     const [msg, setMsg] = useState<

@@ -270,7 +270,9 @@ const AddVisitModal = ({
         getVisitsGnssFiles();
     };
 
-    const handleChange = (e: HTMLInputElement | HTMLSelectElement) => {
+    const handleChange = (
+        e: HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement,
+    ) => {
         const { name, value } = e;
 
         dispatch({
@@ -441,6 +443,40 @@ const AddVisitModal = ({
                                                     </span>
                                                 )}
                                             </div>
+                                        </div>
+                                    ) : key === "comments" ? (
+                                        <div className="flex flex-col w-full">
+                                            <div className="label">
+                                                <span className="font-bold">
+                                                    {key
+                                                        .toUpperCase()
+                                                        .replace("_", " ")
+                                                        .replace("_", " ")}
+                                                </span>
+                                            </div>
+                                            <textarea
+                                                name={key}
+                                                value={
+                                                    formState[
+                                                        key as keyof typeof formState
+                                                    ] ?? ""
+                                                }
+                                                onChange={(e) => {
+                                                    handleChange(e.target);
+                                                }}
+                                                className="grow textarea textarea-bordered"
+                                                autoComplete="off"
+                                                disabled={inputsToDisable.includes(
+                                                    key,
+                                                )}
+                                                placeholder={
+                                                    inputsToDatePicker.includes(
+                                                        key,
+                                                    )
+                                                        ? "YYYY-MM-DD"
+                                                        : ""
+                                                }
+                                            />
                                         </div>
                                     ) : (
                                         <div className="flex w-full">
@@ -617,9 +653,14 @@ const AddVisitModal = ({
                                                   alt={img.name}
                                                   className="size-60 object-cover rounded-md"
                                               />
-                                              <span className="text-sm ml-2 mt-2 w-60">
-                                                  {img.description}
+                                              <span className="text-md font-medium mt-2 mx-auto w-auto">
+                                                  {img.name}
                                               </span>
+                                              {img.description && (
+                                                  <span className="text-sm mt-2 mx-auto w-full">
+                                                      {img.description}
+                                                  </span>
+                                              )}
                                           </div>
                                       ))
                                     : null}

@@ -309,6 +309,7 @@ export interface StationVisitsData {
     people: string[{ id: number; name: string }];
     station_formatted?: string;
     station: number;
+    comments: string;
 }
 
 export interface StationPostVisitData {

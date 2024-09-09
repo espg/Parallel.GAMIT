@@ -3,6 +3,8 @@ import { Alert, Modal } from "@componentsReact";
 
 import { useApi, useAuth, useFormReducer } from "@hooks";
 
+import ExifReader from "exifreader";
+
 import {
     patchStationVisitService,
     postStationVisitFilesService,
@@ -48,8 +50,61 @@ const AddFileModal = ({
         file: "",
         filename: "",
         description: "",
+        name: "",
         [pageType]: id ?? undefined,
     });
+
+    const handleChangePhoto = async (e: HTMLInputElement) => {
+        const { files } = e;
+
+        if (!files || files.length === 0) return;
+
+        const file = files[0];
+        try {
+            const tags = await ExifReader.load(file, { async: true });
+
+            if (tags.DateTimeOriginal) {
+                const photoDatetime = tags.DateTimeOriginal?.description
+                    .replace(" ", "_")
+                    .replace(/:/g, "");
+                dispatch({
+                    type: "change_value",
+                    payload: {
+                        inputName: "name",
+                        inputValue:
+                            photoDatetime + "." + file.name.split(".").pop(),
+                    },
+                });
+                dispatch({
+                    type: "change_value",
+                    payload: {
+                        inputName: "image",
+                        inputValue: file,
+                    },
+                });
+            } else {
+                const lastModifiedDate = new Date(file["lastModified"]);
+                const formattedDate = `${lastModifiedDate.getFullYear()}${String(lastModifiedDate.getMonth() + 1).padStart(2, "0")}${String(lastModifiedDate.getDate()).padStart(2, "0")}_${String(lastModifiedDate.getHours()).padStart(2, "0")}${String(lastModifiedDate.getMinutes()).padStart(2, "0")}${String(lastModifiedDate.getSeconds()).padStart(2, "0")}`;
+                dispatch({
+                    type: "change_value",
+                    payload: {
+                        inputName: "name",
+                        inputValue:
+                            formattedDate + "." + file.name.split(".").pop(),
+                    },
+                });
+                dispatch({
+                    type: "change_value",
+                    payload: {
+                        inputName: "image",
+                        inputValue: file,
+                    },
+                });
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    };
 
     const addFile = async () => {
         try {
@@ -208,6 +263,8 @@ const AddFileModal = ({
 
     const errorBadge = msg?.errors?.errors?.map((error) => error.attr);
 
+    console.log(fileType, formState);
+
     return (
         <Modal
             close={false}
@@ -234,44 +291,113 @@ const AddFileModal = ({
                         }
                         className={` ${errorBadge?.includes("file") ? "file-input-error" : ""} file-input file-input-bordered w-full `}
                         onChange={(e) => {
-                            dispatch({
-                                type: "change_value",
-                                payload: {
-                                    inputName:
-                                        fileType === "logsheet"
-                                            ? "log_sheet_file"
-                                            : fileType === "navfile"
-                                              ? "navigation_file"
-                                              : fileType === "visitImage"
-                                                ? "image"
-                                                : "file",
-                                    inputValue:
-                                        e.target.files &&
-                                        e.target.files.length > 0
-                                            ? e.target.files[0]
-                                            : undefined,
-                                },
-                            });
-                            dispatch({
-                                type: "change_value",
-                                payload: {
-                                    inputName:
-                                        fileType === "logsheet"
-                                            ? "log_sheet_filename"
-                                            : fileType === "navfile"
-                                              ? "navigation_filename"
-                                              : "filename",
-                                    inputValue:
-                                        e.target.files &&
-                                        e.target.files.length > 0
-                                            ? e.target.files[0].name
-                                            : undefined,
-                                },
-                            });
+                            {
+                                fileType === "visitImage"
+                                    ? handleChangePhoto(e.target)
+                                    : dispatch({
+                                          type: "change_value",
+                                          payload: {
+                                              inputName:
+                                                  fileType === "logsheet"
+                                                      ? "log_sheet_file"
+                                                      : fileType === "navfile"
+                                                        ? "navigation_file"
+                                                        : fileType ===
+                                                            "visitImage"
+                                                          ? "image"
+                                                          : "file",
+                                              inputValue:
+                                                  e.target.files &&
+                                                  e.target.files.length > 0
+                                                      ? e.target.files[0]
+                                                      : undefined,
+                                          },
+                                      });
+                                dispatch({
+                                    type: "change_value",
+                                    payload: {
+                                        inputName:
+                                            fileType === "logsheet"
+                                                ? "log_sheet_filename"
+                                                : fileType === "navfile"
+                                                  ? "navigation_filename"
+                                                  : "filename",
+                                        inputValue:
+                                            e.target.files &&
+                                            e.target.files.length > 0
+                                                ? e.target.files[0].name
+                                                : undefined,
+                                    },
+                                });
+                            }
                         }}
                     />
                     {fileType === "logsheet" ||
-                    fileType === "navfile" ? null : (
+                    fileType === "navfile" ? null : fileType ===
+                      "visitImage" ? (
+                        <>
+                            <label
+                                className={`w-full input input-bordered flex items-center gap-2  ${errorBadge?.includes("name") ? "input-error" : ""}`}
+                                title={
+                                    errorBadge?.includes("name")
+                                        ? msg?.errors?.errors.find(
+                                              (e) => e.attr === "name",
+                                          )?.detail
+                                        : "Description"
+                                }
+                            >
+                                <div className="label">
+                                    <span className="font-bold">NAME</span>
+                                </div>
+                                <input
+                                    type="text"
+                                    value={formState["name"]}
+                                    onChange={(e) => {
+                                        dispatch({
+                                            type: "change_value",
+                                            payload: {
+                                                inputName: "name",
+                                                inputValue: e.target.value,
+                                            },
+                                        });
+                                    }}
+                                    className="grow "
+                                    autoComplete="off"
+                                />
+                            </label>
+                            <label
+                                className={`w-full input input-bordered flex items-center gap-2  ${errorBadge?.includes("description") ? "input-error" : ""}`}
+                                title={
+                                    errorBadge?.includes("description")
+                                        ? msg?.errors?.errors.find(
+                                              (e) => e.attr === "description",
+                                          )?.detail
+                                        : "Description"
+                                }
+                            >
+                                <div className="label">
+                                    <span className="font-bold">
+                                        DESCRIPTION
+                                    </span>
+                                </div>
+                                <input
+                                    type="text"
+                                    value={formState["description"]}
+                                    onChange={(e) => {
+                                        dispatch({
+                                            type: "change_value",
+                                            payload: {
+                                                inputName: "description",
+                                                inputValue: e.target.value,
+                                            },
+                                        });
+                                    }}
+                                    className="grow "
+                                    autoComplete="off"
+                                />
+                            </label>
+                        </>
+                    ) : (
                         <label
                             className={`w-full input input-bordered flex items-center gap-2  ${errorBadge?.includes("description") ? "input-error" : ""}`}
                             title={

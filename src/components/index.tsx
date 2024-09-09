@@ -20,6 +20,10 @@ export { default as Photo } from "./Photo";
 
 export { default as Breadcrumb } from "./Breadcrumb";
 
+export { default as PdfContainer } from "./station/Pdf/PdfContainer";
+
+export { default as Pdf } from "./station/Pdf/Pdf";
+
 // TABLE
 
 export { default as Table } from "./table/Table";

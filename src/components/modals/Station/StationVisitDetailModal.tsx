@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import {
     AddFileModal,
+    Alert,
     ConfirmDeleteModal,
     ImageModal,
     Modal,
@@ -51,6 +52,7 @@ import {
 } from "@types";
 
 import { showModal } from "@utils";
+import { useFormReducer } from "@hooks/index";
 
 interface Props {
     campaigns: StationCampaignsData[] | undefined;
@@ -86,6 +88,10 @@ const StationVisitDetailModal = ({
         { status: number; msg: string; errors?: Errors } | undefined
     >(undefined);
 
+    const [commentsMsg, setCommentsMsg] = useState<
+        { status: number; msg: string; errors?: Errors } | undefined
+    >(undefined);
+
     // Visit photo
 
     const [blurPhoto, setBlurPhoto] = useState<
@@ -101,6 +107,8 @@ const StationVisitDetailModal = ({
     // ---
 
     const [loading, setLoading] = useState<boolean>(false);
+
+    const [commentLoading, setCommentLoading] = useState<boolean>(false);
 
     const [edit, setEdit] = useState<boolean>(false);
 
@@ -144,6 +152,10 @@ const StationVisitDetailModal = ({
     type expandedStationVisitData = StationVisitsData & {
         statusCode: number;
     };
+
+    const { formState, dispatch } = useFormReducer({
+        comments: "",
+    });
 
     const getVisitById = async () => {
         try {
@@ -296,6 +308,46 @@ const StationVisitDetailModal = ({
             setPeople(res.data);
         } catch (err) {
             console.error(err);
+        }
+    };
+
+    const patchVisit = async () => {
+        try {
+            if (!visitId) return null;
+            setCommentLoading(true);
+
+            const formData = new FormData();
+
+            Object.entries(formState).forEach(([key, value]) => {
+                formData.append("station", String(visit?.station));
+                formData.append("date", visit?.date ?? "");
+                formData.append(key, value);
+            });
+
+            const res = await patchStationVisitService<ErrorResponse>(
+                api,
+                visitId,
+                formData,
+            );
+            if ("status" in res) {
+                setCommentsMsg({
+                    status: res.statusCode,
+                    msg: res.response.type,
+                    errors: res.response,
+                });
+            } else {
+                setCommentsMsg({
+                    status: 200,
+                    msg: "Comments updated successfully",
+                });
+            }
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setCommentLoading(false);
+            setTimeout(() => {
+                setCommentsMsg(undefined);
+            }, 2500);
         }
     };
 
@@ -507,6 +559,16 @@ const StationVisitDetailModal = ({
     }, [visitId]);
 
     useEffect(() => {
+        dispatch({
+            type: "change_value",
+            payload: {
+                inputName: "comments",
+                inputValue: visit?.comments ?? "",
+            },
+        });
+    }, [visit]);
+
+    useEffect(() => {
         modals?.show && showModal(modals.title);
     }, [modals]);
 
@@ -517,6 +579,10 @@ const StationVisitDetailModal = ({
         slidesToShow: 1,
         slidesToScroll: 1,
     };
+
+    const errorBadge = commentsMsg?.errors?.errors?.find(
+        (error) => error.attr === "comments",
+    );
 
     return (
         <Modal
@@ -877,6 +943,67 @@ const StationVisitDetailModal = ({
                                                 )}
                                             </div>
                                         </div>
+                                    </div>
+                                </div>
+                                <div className="flex items-center">
+                                    <div className="w-full flex flex-col space-y-2">
+                                        <label
+                                            className={`form-control w-full`}
+                                            title={
+                                                errorBadge
+                                                    ? errorBadge.detail
+                                                    : ""
+                                            }
+                                        >
+                                            <strong className="text-lg">
+                                                Comments:{" "}
+                                            </strong>
+
+                                            <textarea
+                                                className={`textarea textarea-bordered w-full 
+                                                                                    `}
+                                                disabled={edit ? false : true}
+                                                autoComplete="off"
+                                                value={
+                                                    formState["comments"] ?? ""
+                                                }
+                                                name={"comments"}
+                                                onChange={(e) =>
+                                                    dispatch({
+                                                        type: "change_value",
+                                                        payload: {
+                                                            inputName:
+                                                                "comments",
+                                                            inputValue:
+                                                                e.target.value,
+                                                        },
+                                                    })
+                                                }
+                                            />
+                                            {errorBadge && (
+                                                <span className="badge badge-error self-end">
+                                                    {errorBadge.code}
+                                                </span>
+                                            )}
+                                        </label>
+
+                                        <Alert msg={commentsMsg} />
+
+                                        {edit && (
+                                            <button
+                                                className="w-36 self-center btn btn-success rounded"
+                                                onClick={() => patchVisit()}
+                                            >
+                                                {commentLoading && (
+                                                    <div
+                                                        className="inline-block size-6
+                                mx-2 animate-spin rounded-full border-4 border-solid border-current border-e-transparent align-[-0.125em] text-white motion-reduce:animate-[spin_1.5s_linear_infinite]"
+                                                        role="status"
+                                                    ></div>
+                                                )}
+                                                Save comments
+                                            </button>
+                                        )}
                                     </div>
                                 </div>
                             </div>

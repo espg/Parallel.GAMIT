@@ -60,6 +60,7 @@ export const VISIT_STATE = {
     navigation_file: "",
     campaign: "",
     people: "",
+    comments: "",
 };
 
 export const CAMPAIGN_STATE = {

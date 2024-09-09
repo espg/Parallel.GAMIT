@@ -36,6 +36,10 @@ import { Bars3BottomRightIcon, TrashIcon } from "@heroicons/react/24/outline";
 
 import { showModal } from "@utils";
 
+interface OutletContext {
+    station: StationData;
+}
+
 const Visits = () => {
     const { token, logout } = useAuth();
     const api = useApi(token, logout);
@@ -54,7 +58,7 @@ const Visits = () => {
             : undefined
         : undefined;
 
-    const station: StationData = useOutletContext();
+    const { station } = useOutletContext<OutletContext>();
 
     const [loading, setLoading] = useState<boolean>(false);
 

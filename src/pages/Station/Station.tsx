@@ -9,16 +9,22 @@ import { router } from "App";
 
 import { useEffect, useState } from "react";
 
-import { Sidebar, Skeleton, Breadcrumb } from "@componentsReact";
+import { Sidebar, Skeleton, Breadcrumb, PdfContainer } from "@componentsReact";
 
 import { useAuth } from "@hooks/useAuth";
 
 import useApi from "@hooks/useApi";
 
-import { getStationMetaService, getStationsService } from "@services";
+import {
+    getStationImagesService,
+    getStationMetaService,
+    getStationsService,
+} from "@services";
 
 import {
     StationData,
+    StationImagesData,
+    StationImagesServiceData,
     StationMetadataServiceData,
     StationServiceData,
 } from "@types";
@@ -34,7 +40,12 @@ const Station = () => {
         StationMetadataServiceData | undefined
     >(undefined);
 
+    const [images, setImages] = useState<StationImagesData[] | undefined>(
+        undefined,
+    );
+
     const [loading, setLoading] = useState<boolean>(true);
+    const [photoLoading, setPhotoLoading] = useState<boolean>(true);
 
     const getStation = async () => {
         try {
@@ -67,6 +78,26 @@ const Station = () => {
         }
     };
 
+    const getStationImages = async () => {
+        try {
+            setPhotoLoading(true);
+            const result =
+                await getStationImagesService<StationImagesServiceData>(api, {
+                    offset: 0,
+                    limit: 0,
+                    station_api_id: String(station?.api_id),
+                });
+
+            if (result) {
+                setImages(result.data);
+            }
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setPhotoLoading(false);
+        }
+    };
+
     const refetch = () => {
         getStation();
     };
@@ -83,13 +114,14 @@ const Station = () => {
         } else {
             getStation();
         }
-    }, [locationState]);
+    }, [locationState]); //eslint-disable-line
 
     useEffect(() => {
         if (station) {
             getStationMeta();
+            getStationImages();
         }
-    }, [station]);
+    }, [station]); //eslint-disable-line
 
     const navigate = useNavigate();
 
@@ -140,10 +172,24 @@ const Station = () => {
                         state={station ? station : locationState}
                     />
                     <div className="w-full flex flex-col pt-20">
-                        <h1 className="text-6xl font-bold text-center">
+                        <h1 className="text-6xl font-bold text-center flex items-center justify-center">
                             {stationTitle}
+
+                            {/* <PdfContainer
+                                station={station}
+                                stationMeta={stationMeta}
+                                images={images}
+                            /> */}
                         </h1>
-                        <Outlet context={station} />
+                        <Outlet
+                            context={{
+                                station,
+                                stationMeta,
+                                images,
+                                photoLoading,
+                                getStationImages,
+                            }}
+                        />
                     </div>{" "}
                 </div>
             )}

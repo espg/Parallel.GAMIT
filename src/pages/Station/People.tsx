@@ -32,11 +32,15 @@ import {
     StationStatus,
 } from "@types";
 
+interface OutletContext {
+    station: StationData;
+}
+
 const People = () => {
     const { token, logout } = useAuth();
     const api = useApi(token, logout);
 
-    const station: StationData = useOutletContext(); // eslint-disable-line
+    const { station } = useOutletContext<OutletContext>();
     const stationID = (station?.api_id ?? "").toString();
 
     const [loading, setLoading] = useState<boolean>(false);
