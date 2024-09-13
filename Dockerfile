@@ -2,7 +2,7 @@ FROM node:22 AS build
 
 WORKDIR /app
 COPY . /app
-COPY .env.sample /app/.env
+COPY .env /app/.env
 
 COPY package*.json /app/
 
