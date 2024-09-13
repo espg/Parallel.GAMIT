@@ -22,6 +22,8 @@ This will build the Docker image and start the application in detached mode.
 
 ## Development
 
+Node version used v22.0.0
+
 - To run the project locally without Docker, use:
 
   ```bash
@@ -29,3 +31,4 @@ This will build the Docker image and start the application in detached mode.
   npm run dev
   ```
 This will start the development server on your local machine.
+
