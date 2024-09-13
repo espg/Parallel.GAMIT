@@ -133,8 +133,8 @@ const MapStation = ({
             if (container) {
                 domtoimage
                     .toPng(container, {
-                        width: 860,
-                        height: 530,
+                        width: container.clientWidth,
+                        height: container.clientHeight,
                     })
                     .then((dataUrl) => {
                         callback(dataUrl);
