@@ -68,12 +68,7 @@ export async function getUserPhotoService<T>(
     id: number,
 ): Promise<T> {
     try {
-        const response = await api.get(`api/users/${id}/photo`, {
-            responseType: "blob",
-            headers: {
-                "Content-Type": "image/*",
-            },
-        });
+        const response = await api.get(`api/users/${id}/photo`);
         return response.data as Promise<T>;
     } catch (error) {
         return Promise.reject(error);

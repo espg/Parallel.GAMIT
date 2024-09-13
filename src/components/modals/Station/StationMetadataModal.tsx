@@ -480,7 +480,6 @@ const StationMetadataModal = ({
 
                 if (resMeta.statusCode === 200 && res.statusCode === 200) {
                     setTimeout(() => {
-                        refetch();
                         setEdit(false);
                     }, 1000);
                 }
@@ -525,6 +524,9 @@ const StationMetadataModal = ({
             modalId={"Metadata"}
             size={size}
             setModalState={setModalState}
+            handleCloseModal={() => {
+                refetch();
+            }}
         >
             <div className="w-full inline-flex">
                 <h3 className="font-bold text-center text-3xl my-2 grow">
@@ -631,8 +633,27 @@ const StationMetadataModal = ({
                                                                     )}
                                                                 </label>
                                                             </div>
+                                                        ) : key ===
+                                                          "remote_access_link" ? (
+                                                            <a
+                                                                target="_blank"
+                                                                className="link link-hover break-words"
+                                                                href={
+                                                                    formState
+                                                                        .stationMeta[
+                                                                        key as keyof typeof formState.stationMeta
+                                                                    ]
+                                                                }
+                                                            >
+                                                                {
+                                                                    formState
+                                                                        .stationMeta[
+                                                                        key as keyof typeof formState.stationMeta
+                                                                    ]
+                                                                }
+                                                            </a>
                                                         ) : (
-                                                            <p>
+                                                            <p className="break-words">
                                                                 {formState
                                                                     .stationMeta[
                                                                     key as keyof typeof formState.stationMeta
@@ -876,7 +897,7 @@ const StationMetadataModal = ({
                                                                 )}
                                                             </div>
                                                         ) : (
-                                                            <p>
+                                                            <p className="break-words">
                                                                 {formState
                                                                     .booleansDesc[
                                                                     descKey
@@ -914,7 +935,7 @@ const StationMetadataModal = ({
                                                             }
                                                         </div>
 
-                                                        <p>
+                                                        <p className="break-words">
                                                             {value ? (
                                                                 formattedDates(
                                                                     new Date(
@@ -1043,7 +1064,7 @@ const StationMetadataModal = ({
                                                                                 <TrashIcon className="size-6 text-red-600" />
                                                                             </button>
                                                                         )}
-                                                                        <p>
+                                                                        <p className="break-words">
                                                                             {formState
                                                                                 .rinex[
                                                                                 key as keyof typeof formState.rinex
@@ -1079,7 +1100,7 @@ const StationMetadataModal = ({
                                                                 )}
                                                             </div>
                                                         ) : (
-                                                            <p>
+                                                            <p className="break-words">
                                                                 {formState
                                                                     .rinex[
                                                                     key as keyof typeof formState.rinex
@@ -1354,7 +1375,7 @@ const StationMetadataModal = ({
                                                                 )}
                                                             </div>
                                                         ) : (
-                                                            <p>
+                                                            <p className="break-words">
                                                                 {formState
                                                                     .station[
                                                                     key as keyof typeof formState.station
@@ -1401,7 +1422,7 @@ const StationMetadataModal = ({
                                                             }
                                                         </div>
 
-                                                        <p>
+                                                        <p className="break-words">
                                                             {value ? (
                                                                 value
                                                             ) : (

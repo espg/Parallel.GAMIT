@@ -86,6 +86,10 @@ const AddVisitModal = ({
 
     const [people, setPeople] = useState<PeopleType[]>([]);
 
+    const [peopleSelected, setPeopleSelected] = useState<string[] | undefined>(
+        [],
+    );
+
     const [matchingPeople, setMatchingPeople] = useState<
         PeopleType[] | undefined
     >(undefined);
@@ -150,7 +154,9 @@ const AddVisitModal = ({
                     }
                     if (key === "people") {
                         if (!value) return;
-                        const peopleNames = value.split(","); // Asumiendo que los nombres están separados por comas
+
+                        const peopleNames = value.split(" / "); // Asumiendo que los nombres están separados por comas
+
                         peopleNames.forEach((name) => {
                             const personToAdd = people?.find(
                                 (p) =>
@@ -335,6 +341,16 @@ const AddVisitModal = ({
             payload: formattedState,
         });
     }, [station, campaignB]);
+
+    useEffect(() => {
+        dispatch({
+            type: "change_value",
+            payload: {
+                inputName: "people",
+                inputValue: peopleSelected?.join(" / ") ?? "",
+            },
+        });
+    }, [peopleSelected]);
 
     const handleCloseModal = () => {
         reFetch();
@@ -591,8 +607,8 @@ const AddVisitModal = ({
                                                 )?.map((ppl) => (
                                                     <MenuContent
                                                         multiple={true}
-                                                        multipleValue={
-                                                            formState.people
+                                                        multipleSelected={
+                                                            peopleSelected
                                                         }
                                                         key={
                                                             ppl.id +
@@ -605,6 +621,9 @@ const AddVisitModal = ({
                                                             ppl.last_name
                                                         }
                                                         dispatch={dispatch}
+                                                        setMultipleSelected={
+                                                            setPeopleSelected
+                                                        }
                                                         setShowMenu={
                                                             setShowMenu
                                                         }

@@ -241,7 +241,7 @@ const Visits = () => {
                         ) : (
                             <div
                                 className={`grid 
-                                    ${visits && visits.length === 1 ? "grid-cols-1" : visits && visits.length > 2 ? "grid-cols-3" : "grid-cols-2"} 
+                                    ${visits && visits.length === 1 ? "grid-cols-1" : visits && visits.length > 2 && "grid-cols-2"} 
                                 grid-flow-dense gap-4`}
                             >
                                 {visits?.map((vis) => {
@@ -319,7 +319,7 @@ const Visits = () => {
                                                                 alt={
                                                                     img.description
                                                                 }
-                                                                className="shadow-xl rounded-lg size-4/5"
+                                                                className="shadow-xl rounded-lg object-center object-cover w-full h-full"
                                                             />
                                                         );
                                                     })}
@@ -330,6 +330,7 @@ const Visits = () => {
                                                             vis.navigation_actual_file ??
                                                             ""
                                                         }
+                                                        station={station}
                                                     />
                                                 )}
                                             </div>

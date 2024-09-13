@@ -1,17 +1,23 @@
 import { useEffect, useState } from "react";
-import { MapContainer, TileLayer, useMap } from "react-leaflet";
+import { MapContainer, Marker, Popup, TileLayer, useMap } from "react-leaflet";
 import JSZip from "jszip";
 // @ts-expect-error leaflet omnivore doesnt have any types
 import omnivore from "leaflet-omnivore";
+import { StationData } from "@types";
+import { LatLngExpression } from "leaflet";
+import PopupChildren from "./PopupChildren";
 
 interface MyMapContainerProps {
     zoom: number;
     scrollWheelZoom: boolean;
+    center: LatLngExpression;
+
     style?: React.CSSProperties;
 }
 
 interface MapProps {
     base64Data: string; // Base64 data from the database
+    station: StationData;
 }
 
 const LoadKmzFromBase64 = ({ base64Data }: { base64Data: string }) => {
@@ -68,11 +74,22 @@ const LoadKmzFromBase64 = ({ base64Data }: { base64Data: string }) => {
     return null;
 };
 
-const MapVisit = ({ base64Data }: MapProps) => {
-    const [mapProps] = useState<MyMapContainerProps>({
+const MapVisit = ({ base64Data, station }: MapProps) => {
+    const [mapProps, setMapProps] = useState<MyMapContainerProps>({
         zoom: 13,
+        center: [0, 0],
         scrollWheelZoom: true,
     });
+
+    useEffect(() => {
+        const pos: LatLngExpression = station
+            ? [station.lat, station.lon]
+            : [0, 0];
+        setMapProps({
+            ...mapProps,
+            center: pos,
+        });
+    }, [station]);
 
     return (
         <div className="z-10 pt-6 flex justify-center">
@@ -85,6 +102,15 @@ const MapVisit = ({ base64Data }: MapProps) => {
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                     minZoom={4}
                 />
+                <Marker
+                    // icon={iconGaps}
+                    key={station ? station.lat + station.lon : "key"}
+                    position={mapProps.center}
+                >
+                    <Popup maxWidth={1000} minWidth={200}>
+                        <PopupChildren station={station} />
+                    </Popup>
+                </Marker>
                 <LoadKmzFromBase64 base64Data={base64Data} />
             </MapContainer>
         </div>

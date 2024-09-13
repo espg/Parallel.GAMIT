@@ -4,11 +4,14 @@ import { FormReducerAction } from "@hooks/useFormReducer";
 interface MenuContentProps {
     value: string;
     multiple?: boolean;
-    multipleValue?: string;
+    multipleSelected?: any | undefined;
     alterValue?: string;
     typeKey: string;
     disabled?: boolean;
     alterFunction?: () => void;
+    setMultipleSelected?: React.Dispatch<
+        React.SetStateAction<string[] | undefined>
+    >;
     dispatch?: (value: FormReducerAction) => void;
     setShowMenu: React.Dispatch<
         React.SetStateAction<
@@ -24,27 +27,34 @@ interface MenuContentProps {
 const MenuContent = ({
     value,
     multiple,
-    multipleValue,
+    multipleSelected,
     alterValue,
     typeKey,
     disabled,
     dispatch,
     alterFunction,
+    setMultipleSelected,
     setShowMenu,
 }: MenuContentProps) => {
     const handleClick = () => {
-        let newValue = alterValue ? alterValue : value;
+        const newValue = alterValue ? alterValue : value;
 
         if (multiple) {
-            let valuesArray = multipleValue ? multipleValue.split(",") : [];
-            if (valuesArray.includes(value)) {
-                valuesArray = valuesArray.filter((v) => v !== value);
-            } else {
-                valuesArray.push(value);
-            }
-            newValue = valuesArray.join(",");
+            setMultipleSelected &&
+                setMultipleSelected((prev) => {
+                    if (prev) {
+                        if (prev.includes(value)) {
+                            return prev.filter((v) => v !== value);
+                        } else {
+                            return [...prev, value];
+                        }
+                    } else {
+                        return [value];
+                    }
+                });
         }
         dispatch &&
+            !setMultipleSelected &&
             dispatch({
                 type: "change_value",
                 payload: {
@@ -68,7 +78,7 @@ const MenuContent = ({
                 }}
             >
                 {value}{" "}
-                {multiple && multipleValue?.split(",").includes(value) ? (
+                {multiple && multipleSelected.includes(value) ? (
                     <span className="absolute right-10">
                         <CheckIcon className="size-6" />
                     </span>

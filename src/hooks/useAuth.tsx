@@ -103,8 +103,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
                     api,
                     Number(tokenDeserialized?.user_id),
                 );
-                const url = URL.createObjectURL(res);
-                setUserPhoto(url);
+                if (res.statusCode === 200) {
+                    setUserPhoto(res.photo);
+                }
             }
         } catch (err) {
             console.error(err);

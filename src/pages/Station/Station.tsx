@@ -19,6 +19,7 @@ import {
     getStationImagesService,
     getStationMetaService,
     getStationsService,
+    getStationVisitsService,
 } from "@services";
 
 import {
@@ -27,6 +28,8 @@ import {
     StationImagesServiceData,
     StationMetadataServiceData,
     StationServiceData,
+    StationVisitsData,
+    StationVisitsServiceData,
 } from "@types";
 
 const Station = () => {
@@ -44,8 +47,25 @@ const Station = () => {
         undefined,
     );
 
+    const [visitForKml, setVisitForKml] = useState<
+        StationVisitsData | undefined
+    >(undefined);
+
+    const [visits, setVisits] = useState<StationVisitsData[] | undefined>(
+        undefined,
+    );
+
     const [loading, setLoading] = useState<boolean>(true);
     const [photoLoading, setPhotoLoading] = useState<boolean>(true);
+
+    const [stationLocationScreen, setStationLocationScreen] =
+        useState<string>("");
+
+    const [stationLocationDetailScreen, setStationLocationDetailScreen] =
+        useState<string>("");
+
+    const [loadPdf, setLoadPdf] = useState<boolean>(false);
+    const [loadedMap, setLoadedMap] = useState<boolean | undefined>(undefined);
 
     const getStation = async () => {
         try {
@@ -59,8 +79,6 @@ const Station = () => {
             setStation(res.data[0]);
         } catch (e) {
             console.error(e);
-        } finally {
-            setLoading(false);
         }
     };
 
@@ -98,8 +116,37 @@ const Station = () => {
         }
     };
 
+    const getVisits = async () => {
+        try {
+            const res = await getStationVisitsService<StationVisitsServiceData>(
+                api,
+                {
+                    limit: 0,
+                    offset: 0,
+                    station_api_id: String(station?.api_id),
+                },
+            );
+
+            if (res.statusCode === 200) {
+                setVisitForKml(
+                    res.data.sort(
+                        (a, b) =>
+                            new Date(b.date).getTime() -
+                            new Date(a.date).getTime(),
+                    )[0],
+                );
+                setVisits(res.data);
+            }
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const refetch = () => {
         getStation();
+        setLoadedMap(undefined);
     };
 
     const location = useLocation();
@@ -118,6 +165,7 @@ const Station = () => {
 
     useEffect(() => {
         if (station) {
+            getVisits();
             getStationMeta();
             getStationImages();
         }
@@ -144,6 +192,16 @@ const Station = () => {
             };
         }
     }, [station, locationState, navigate]);
+
+    useEffect(() => {
+        if (station) {
+            if (location.pathname === `/${nc}/${sc}`) {
+                getVisits();
+            }
+            setLoadPdf(false);
+            setLoadedMap(undefined);
+        }
+    }, [location, station]);
 
     const stationTitle = station
         ? station?.network_code?.toUpperCase() +
@@ -175,11 +233,23 @@ const Station = () => {
                         <h1 className="text-6xl font-bold text-center flex items-center justify-center">
                             {stationTitle}
 
-                            {/* <PdfContainer
-                                station={station}
-                                stationMeta={stationMeta}
-                                images={images}
-                            /> */}
+                            {location.pathname === `/${nc}/${sc}` && (
+                                <PdfContainer
+                                    station={station}
+                                    stationMeta={stationMeta}
+                                    images={images}
+                                    visits={visits}
+                                    loadPdf={loadPdf}
+                                    stationLocationScreen={
+                                        stationLocationScreen
+                                    }
+                                    stationLocationDetailScreen={
+                                        stationLocationDetailScreen
+                                    }
+                                    loadedMap={loadedMap}
+                                    setLoadPdf={setLoadPdf}
+                                />
+                            )}
                         </h1>
                         <Outlet
                             context={{
@@ -187,7 +257,13 @@ const Station = () => {
                                 stationMeta,
                                 images,
                                 photoLoading,
+                                loadPdf,
+                                visitForKml,
                                 getStationImages,
+                                setStationLocationScreen,
+                                setStationLocationDetailScreen,
+                                setLoadPdf,
+                                setLoadedMap,
                             }}
                         />
                     </div>{" "}

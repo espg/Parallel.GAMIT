@@ -70,6 +70,7 @@ export interface StationMetadataServiceData {
     station_type: string | null;
     status: string;
     station_type_name: string | null;
+    station_status_name?: string | null;
     statusCode: string;
 }
 
@@ -299,6 +300,7 @@ export interface VisitFilesData {
 
 export interface StationVisitsData {
     campaign: string | null;
+    campaign_name?: string | null;
     campaign_people: string | null;
     date: string;
     id: number;

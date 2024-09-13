@@ -37,7 +37,7 @@ const Nav = () => {
             >(api);
             if ("status" in res) {
                 setServerHealth({
-                    result: res.response.errors[0]?.detail,
+                    result: res?.response?.errors[0]?.detail,
                     statusCode: res.statusCode,
                 });
             } else {
@@ -113,7 +113,7 @@ const Nav = () => {
                             <img
                                 alt="User"
                                 className="rounded-full w-6 h-6"
-                                src={`${userPhoto ? userPhoto : ""} `}
+                                src={`data:image/*;base64,${userPhoto}`}
                             />
                         )}
                     </div>

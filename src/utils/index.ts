@@ -29,6 +29,13 @@ export const formattedDates = (date: Date | string | undefined) => {
     return formattedDate;
 };
 
+export const adjustToLocalTimezone = (dateString: string) => {
+    const localDate = new Date(dateString);
+    const timezoneOffset = localDate.getTimezoneOffset();
+    const adjustedDate = new Date(localDate.getTime() + timezoneOffset * 60000);
+    return adjustedDate;
+};
+
 export const validateFields = (
     object: Record<string, string | number | boolean | null>,
 ) => {

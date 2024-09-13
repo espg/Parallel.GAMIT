@@ -1,25 +1,42 @@
-import { useEffect, useState } from "react";
-import { MapContainer, Marker, Popup, TileLayer, useMap } from "react-leaflet";
+import { useEffect, useRef, useState } from "react";
+import {
+    MapContainer,
+    MapContainerProps,
+    Marker,
+    Popup,
+    TileLayer,
+    useMap,
+} from "react-leaflet";
+import { PopupChildren, Spinner } from "@componentsReact";
+import domtoimage from "dom-to-image";
 import JSZip from "jszip";
 import { LatLngExpression } from "leaflet";
 import L from "leaflet";
 // @ts-expect-error leaflet omnivore doesnt have any types
 import omnivore from "leaflet-omnivore";
 
-import { PopupChildren } from "@componentsReact";
+import nogapsIcon from "@assets/images/placemark_square.png";
+import gapsIcon from "@assets/images/caution.png";
 
 import { StationData } from "@types";
 
-interface MyMapContainerProps {
-    center: LatLngExpression;
-    zoom: number;
-    scrollWheelZoom: boolean;
-    style?: React.CSSProperties;
-}
+// interface MyMapContainerProps {
+//     center: LatLngExpression;
+//     zoom: number;
+//     scrollWheelZoom: boolean;
+//     style?: React.CSSProperties;
+//     id: string;
+//     zoomAnimation: boolean;
+// }
 
 interface MapProps {
     station: StationData | undefined;
     base64Data: string; // Base64 data from the database
+    loadPdf: boolean;
+    setStationLocationScreen?: (url: string) => void;
+    setStationLocationDetailScreen?: (url: string) => void;
+    setLoadPdf: React.Dispatch<React.SetStateAction<boolean>>;
+    setLoadedMap: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const ChangeView = ({
@@ -86,22 +103,97 @@ const LoadKmzFromBase64 = ({ base64Data }: { base64Data: string }) => {
     return null;
 };
 
-const MapStation = ({ station, base64Data }: MapProps) => {
-    const [mapProps, setMapProps] = useState<MyMapContainerProps>({
+const MapStation = ({
+    station,
+    base64Data,
+    loadPdf,
+    setStationLocationScreen,
+    setStationLocationDetailScreen,
+    setLoadPdf,
+    setLoadedMap,
+}: MapProps) => {
+    const [mapProps, setMapProps] = useState<MapContainerProps>({
         center: [0, 0],
-        zoom: 13,
+        zoom: 6,
         scrollWheelZoom: true,
+        id: "leaflet-map",
+        zoomAnimation: true,
     });
 
+    const mapRef = useRef<L.Map | null>(null);
+
+    const captureImage = (
+        timeout: number,
+        callback: (dataUrl: string) => void,
+    ) => {
+        if (!mapRef.current) return;
+
+        setTimeout(() => {
+            const container = mapRef?.current?.getContainer();
+            if (container) {
+                domtoimage
+                    .toPng(container, {
+                        width: 860,
+                        height: 530,
+                    })
+                    .then((dataUrl) => {
+                        callback(dataUrl);
+                    })
+                    .catch((error) => {
+                        console.error("Error capturing map image:", error);
+                    });
+            }
+        }, timeout);
+    };
+
+    useEffect(() => {
+        if (mapRef.current && loadPdf) {
+            setLoadedMap(false);
+
+            setTimeout(() => {
+                setMapProps((prevProps) => ({
+                    ...prevProps,
+                    center: [station?.lat ?? 0, station?.lon ?? 0],
+                    zoom: 6,
+                }));
+            }, 50);
+
+            captureImage(500, (dataUrl) => {
+                setStationLocationScreen && setStationLocationScreen(dataUrl);
+            });
+
+            setTimeout(() => {
+                setMapProps((prevProps) => ({
+                    ...prevProps,
+                    center: [station?.lat ?? 0, station?.lon ?? 0],
+                    zoom: 16,
+                }));
+            }, 1500);
+
+            captureImage(3000, (dataUrl) => {
+                setStationLocationDetailScreen &&
+                    setStationLocationDetailScreen(dataUrl);
+            });
+
+            setTimeout(() => {
+                setMapProps((prevProps) => ({
+                    ...prevProps,
+                    zoom: 6,
+                }));
+                setLoadPdf(false);
+                setLoadedMap(true);
+            }, 4000);
+        }
+    }, [station, mapRef, loadPdf]);
+
     const okIcon = new L.Icon({
-        iconUrl:
-            "https://maps.google.com/mapfiles/kml/shapes/placemark_square.png",
+        iconUrl: nogapsIcon,
         iconSize: [20, 20],
         className: "bg-green-600 border border-black",
     });
 
     const alertIcon = new L.Icon({
-        iconUrl: "https://maps.google.com/mapfiles/kml/shapes/caution.png",
+        iconUrl: gapsIcon,
         iconSize: [20, 20],
     });
 
@@ -116,26 +208,49 @@ const MapStation = ({ station, base64Data }: MapProps) => {
         }));
     }, [station]);
 
+    const [forceRerender, setForceRerender] = useState(0);
+
+    useEffect(() => {
+        setForceRerender((prev) => prev + 1);
+    }, [base64Data]);
+
     const iconGaps =
         station?.has_gaps || !station?.has_stationinfo ? alertIcon : okIcon;
 
     return (
         <div className="z-10 pt-6 w-6/12 flex justify-center">
+            {loadPdf && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[10000]">
+                    <div className=" flex flex-col w-[400px] items-center card card-bordered bg-base-200 p-6 ">
+                        <span className="card-title border-b-2 text-xl mb-4">
+                            Loading data, please wait...
+                        </span>
+                        <div className="card-body">
+                            <Spinner size={"lg"} />
+                        </div>
+                    </div>
+                </div>
+            )}
             <MapContainer
                 {...mapProps}
+                key={forceRerender}
                 className="w-[55vw] h-[55vh] xl:w-[40vw] lg:w-[30vw] md:w-[30vw] sm:w-[20vw]"
+                ref={mapRef}
             >
                 <TileLayer
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                     minZoom={4}
                 />
-                <ChangeView center={mapProps.center} zoom={mapProps.zoom} />
+                <ChangeView
+                    center={mapProps.center ?? [0, 0]}
+                    zoom={mapProps.zoom ?? 0}
+                />
                 <LoadKmzFromBase64 base64Data={base64Data} />
                 <Marker
                     icon={iconGaps}
                     key={station ? station.lat + station.lon : "key"}
-                    position={mapProps.center}
+                    position={mapProps.center ?? [0, 0]}
                 >
                     <Popup maxWidth={1000} minWidth={200}>
                         <PopupChildren station={station} />

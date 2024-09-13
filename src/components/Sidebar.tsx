@@ -1,9 +1,7 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { StationInfoModal, StationMetadataModal } from "@componentsReact";
-
-import { useAuth } from "@hooks/useAuth";
 
 import {
     CodeBracketIcon,
@@ -36,8 +34,6 @@ const Sidebar = ({
     refetch,
     setShow,
 }: SidebarProps) => {
-    const { role } = useAuth();
-
     const navigate = useNavigate();
 
     const [modals, setModals] = useState<
@@ -56,11 +52,6 @@ const Sidebar = ({
 
     // const admTitles = ["Admin", "Users", "Settings"];
     const sidebarWidth = show ? "w-72" : "w-32";
-
-    // eslint-disable-next-line
-    const userRole = useMemo(() => {
-        return role;
-    }, [role]);
 
     useEffect(() => {
         modals?.show && showModal(modals.title);
@@ -142,6 +133,7 @@ const Sidebar = ({
                     close={false}
                     station={station}
                     size={"xl"}
+                    refetch={refetch ? refetch : () => {}}
                     setModalState={setModals}
                 />
             )}

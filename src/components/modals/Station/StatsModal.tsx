@@ -246,6 +246,9 @@ const EditStatsModal = ({
                         status: res.statusCode,
                         msg: "Station info added successfully",
                     });
+                    // setTimeout(() => {
+                    //     refetchAfterUpdate();
+                    // }, 1000);
                 }
             }
         } catch (err) {
@@ -280,6 +283,9 @@ const EditStatsModal = ({
                         status: res.statusCode,
                         msg: "Station info updated successfully",
                     });
+                    // setTimeout(() => {
+                    //     refetchAfterUpdate();
+                    // }, 1000);
                 }
             }
         } catch (err) {
@@ -303,6 +309,9 @@ const EditStatsModal = ({
                         status: res.statusCode,
                         msg: res.msg,
                     });
+                    // setTimeout(() => {
+                    //     refetchAfterUpdate();
+                    // }, 1000);
                 } else {
                     setMsg({
                         status: res.statusCode,
@@ -372,8 +381,6 @@ const EditStatsModal = ({
             payload: STATION_INFO_STATE,
         });
     };
-
-    // TODO: Refactor this to a custom hook
 
     useEffect(() => {
         const handleEsc = (event: { key: string }) => {

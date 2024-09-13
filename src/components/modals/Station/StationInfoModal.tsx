@@ -26,6 +26,7 @@ interface StationInfoModalProps {
             | undefined
         >
     >;
+    refetch: () => void;
 }
 
 const StationInfoModal = ({
@@ -33,6 +34,7 @@ const StationInfoModal = ({
     station,
     size,
     setModalState,
+    refetch,
 }: StationInfoModalProps) => {
     const { token, logout } = useAuth();
     const api = useApi(token, logout);
@@ -157,6 +159,7 @@ const StationInfoModal = ({
             modalId={"Information"}
             size={size}
             setModalState={setModalState}
+            handleCloseModal={refetch}
         >
             <div className="w-full inline-flex">
                 <h3 className="font-bold text-center text-3xl my-2 grow">
