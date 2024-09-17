@@ -432,11 +432,11 @@ const Pdf = ({
                                         // height: 300,
                                         width: "auto",
                                         height: 300,
-                                        marginBottom: 10,
+                                        marginVertical: 10,
                                         objectFit: "scale-down",
                                     }}
                                     src={{
-                                        uri: `data:image/*;base64,${img.actual_image}`,
+                                        uri: `${img.actual_image}`,
                                     }}
                                 />
                             ))

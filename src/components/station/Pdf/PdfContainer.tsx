@@ -267,7 +267,9 @@ const PdfContainer = ({
         });
     };
 
-    const processImages = async (images: StationVisitsFilesData[]) => {
+    const processImages = async (
+        images: StationVisitsFilesData[] | StationImagesData[],
+    ) => {
         const maxWidth = 800;
         const maxHeight = 800;
 
@@ -319,8 +321,17 @@ const PdfContainer = ({
             if ((loadPdf && !loadedMap) || (!loadPdf && !loadedMap)) return;
 
             let processedImages = visitImages;
+            let stationProcessedImages = images;
             if (visitImages && visitImages?.length > 0) {
-                processedImages = await processImages(visitImages);
+                processedImages = (await processImages(
+                    visitImages,
+                )) as StationVisitsFilesData[];
+            }
+
+            if (images && images?.length > 0) {
+                stationProcessedImages = (await processImages(
+                    images,
+                )) as StationImagesData[];
             }
 
             updateInstance(
@@ -330,7 +341,7 @@ const PdfContainer = ({
                     station={station}
                     stationMeta={stationMeta}
                     people={people}
-                    images={images}
+                    images={stationProcessedImages}
                     firstRinex={firstRinex}
                     lastRinex={lastRinex}
                     stationLocationScreen={stationLocationScreen}
