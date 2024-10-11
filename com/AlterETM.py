@@ -135,9 +135,8 @@ def insert_modify_param(parser, cnn, stnlist, args):
 
     # create a bunch object to save all the params that will enter the database
     tpar = Bunch()
-    tpar.NetworkCode, tpar.StationCode, tpar.soln, tpar.object = None
-    tpar.terms, tpar.frequencies, tpar.jump_type, tpar.relaxation = None
-    tpar.Year, tpar.DOY, tpar.action = None
+    tpar.NetworkCode = tpar.StationCode = tpar.soln = tpar.object = tpar.terms = tpar.frequencies = None
+    tpar.jump_type = tpar.relaxation = tpar.Year = tpar.DOY = tpar.action = None
 
     ftype = args.function_type[0]
     remove_eq = remove_mec = False
